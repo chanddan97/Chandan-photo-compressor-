@@ -1,0 +1,1289 @@
+  <!DOCTYPE html>
+  <html lang="bn" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Pro Photo Compressor Studio</title>
+  
+    <!-- Hind Siliguri Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Hind Siliguri"', 'system-ui', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                bg: '#0f172a',
+                card: 'rgba(30, 41, 59, 0.72)',
+                accent: '#38bdf8',
+                indigo: '#6366f1',
+              },
+            },
+          },
+        },
+      };
+    </script>
+  
+    <!-- Image Compression & JSZip -->
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  
+    <style>
+      :root {
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+      }
+  
+      * {
+        -webkit-tap-highlight-color: transparent;
+        box-sizing: border-box;
+      }
+  
+      html, body {
+        margin: 0;
+        padding: 0;
+        background-color: #0f172a;
+        color: #f8fafc;
+        font-family: 'Hind Siliguri', sans-serif;
+        overscroll-behavior-y: contain;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+  
+      input, textarea {
+        user-select: text;
+        -webkit-user-select: text;
+      }
+  
+      /* Native App Ambient Background */
+      .app-bg {
+        background:
+          radial-gradient(circle at 15% 10%, rgba(56, 189, 248, 0.14), transparent 38%),
+          radial-gradient(circle at 85% 25%, rgba(99, 102, 241, 0.14), transparent 40%),
+          #0f172a;
+      }
+  
+      .glass-card {
+        background: rgba(30, 41, 59, 0.65);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+  
+      .glass-bar {
+        background: rgba(15, 23, 42, 0.88);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-color: rgba(255, 255, 255, 0.09);
+      }
+  
+      /* Custom Android Range Slider */
+      input[type='range'].android-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.25);
+        outline: none;
+      }
+      input[type='range'].android-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #38bdf8, #6366f1);
+        border: 3px solid #f8fafc;
+        box-shadow: 0 2px 10px rgba(56, 189, 248, 0.55);
+        cursor: pointer;
+      }
+  
+      /* Hide Scrollbar on Horizontal Filmstrip */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+  
+      /* Touch Comparison Container */
+      .compare-stage {
+        touch-action: none;
+        position: relative;
+        overflow: hidden;
+        background-image:
+          linear-gradient(45deg, #1e293b 25%, transparent 25%),
+          linear-gradient(-45deg, #1e293b 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #1e293b 75%),
+          linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+        background-size: 16px 16px;
+        background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+      }
+  
+      /* Bottom Sheet Animation */
+      .bottom-sheet-enter {
+        animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      @keyframes slideUp {
+        from { transform: translateY(100%); opacity: 0.4; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+  
+      /* Active Press Effect like Android Ripple */
+      .tap-scale:active {
+        transform: scale(0.96);
+        transition: transform 0.1s ease;
+      }
+    </style>
+  </head>
+  <body class="app-bg min-h-dvh flex flex-col">
+  
+    <!-- Native Mobile Frame Wrapper (Always looks like an Android App) -->
+    <div class="w-full max-w-md mx-auto min-h-dvh flex flex-col relative shadow-2xl shadow-black/40">
+  
+      <!-- Top Native Android App Bar -->
+      <header
+        class="glass-bar sticky top-0 z-30 border-b px-4 pb-3 flex items-center justify-between"
+        style="padding-top: calc(var(--safe-top) + 12px);"
+      >
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/25 shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div class="truncate">
+            <h1 class="text-base font-bold leading-tight text-white truncate">Photo Compressor</h1>
+            <p class="text-[11px] text-slate-400 flex items-center gap-1.5">
+              <span>Pro Studio</span>
+              <span class="w-1 h-1 rounded-full bg-sky-400"></span>
+              <span id="appVersionBadge">v1.0.0</span>
+            </p>
+          </div>
+        </div>
+  
+        <div class="flex items-center gap-1.5 shrink-0">
+          <!-- Manual Update Check Button -->
+          <button
+            id="btnCheckUpdate"
+            type="button"
+            title="আপডেট চেক করুন"
+            class="tap-scale relative w-10 h-10 rounded-full glass-card flex items-center justify-center text-slate-200 hover:text-sky-400"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span id="updateDot" class="hidden absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-slate-900 animate-pulse"></span>
+          </button>
+  
+          <!-- Clear All Button -->
+          <button
+            id="btnClearAll"
+            type="button"
+            title="সব মুছুন"
+            class="hidden tap-scale w-10 h-10 rounded-full glass-card flex items-center justify-center text-rose-400"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+      </header>
+  
+      <!-- Hidden File Input (Single & Bulk) -->
+      <input id="fileInput" type="file" accept="image/*" multiple class="hidden" />
+  
+      <!-- Main Scrollable Content -->
+      <main class="flex-1 px-4 pt-4 pb-32 space-y-4">
+  
+        <!-- Empty State / Upload Dropzone -->
+        <section
+          id="dropZone"
+          class="glass-card rounded-3xl p-7 text-center border-2 border-dashed border-sky-400/35 active:border-sky-400 transition-colors cursor-pointer"
+        >
+          <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center text-sky-400">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+            </svg>
+          </div>
+          <h2 class="text-lg font-bold text-white mb-1">ছবি সিলেক্ট করুন</h2>
+          <p class="text-xs text-slate-400 mb-5 leading-relaxed">
+            একটি বা একসাথে একাধিক ছবি গ্যালারি থেকে বেছে নিন অথবা এখানে ড্রপ করুন
+          </p>
+          <button
+            id="btnSelectFiles"
+            type="button"
+            class="tap-scale w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-semibold text-sm shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            গ্যালারি থেকে ছবি নিন (Single / Bulk)
+          </button>
+          <div class="mt-4 flex items-center justify-center gap-2 text-[11px] text-slate-400">
+            <span class="px-2.5 py-0.5 rounded-full bg-white/5">JPG</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-white/5">PNG</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-white/5">WebP</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-white/5">100% অফলাইন প্রসেসিং</span>
+          </div>
+        </section>
+  
+        <!-- Workspace (Visible when images are loaded) -->
+        <div id="workspace" class="hidden space-y-4">
+  
+          <!-- Bulk Thumbnail Strip (Swipeable Filmstrip) -->
+          <section class="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1">
+            <!-- Add More Button -->
+            <button
+              id="btnAddMore"
+              type="button"
+              class="tap-scale shrink-0 w-16 h-16 rounded-2xl glass-card border border-dashed border-sky-400/50 flex flex-col items-center justify-center text-sky-400 text-[11px] font-medium"
+            >
+              <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              যোগ করুন
+            </button>
+            <div id="thumbnailStrip" class="flex items-center gap-2.5"></div>
+          </section>
+  
+          <!-- Realtime Before / After Comparison Card -->
+          <section class="glass-card rounded-3xl p-3 space-y-3">
+            <div class="flex items-center justify-between px-1">
+              <span id="activeFileName" class="text-xs font-medium text-slate-300 truncate max-w-[65%]">image.jpg</span>
+              <span id="activeSavedBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                প্রসেসিং...
+              </span>
+            </div>
+  
+            <!-- Interactive Comparison Viewport -->
+            <div id="compareStage" class="compare-stage w-full h-64 rounded-2xl border border-white/10 select-none">
+              <!-- After (Compressed) Layer -->
+              <img id="imgAfter" alt="Compressed Preview" class="absolute inset-0 w-full h-full object-contain pointer-events-none" />
+  
+              <!-- Before (Original) Clipped Layer -->
+              <div id="beforeClip" class="absolute inset-0 overflow-hidden pointer-events-none" style="clip-path: inset(0 50% 0 0);">
+                <img id="imgBefore" alt="Original Preview" class="w-full h-full object-contain pointer-events-none" />
+              </div>
+  
+              <!-- Floating Labels -->
+              <div class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-xl bg-slate-950/75 backdrop-blur text-[11px] font-semibold text-slate-200 pointer-events-none">
+                আসল: <span id="lblBeforeSize">0 KB</span>
+              </div>
+              <div class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-xl bg-sky-950/85 backdrop-blur border border-sky-400/30 text-[11px] font-semibold text-sky-300 pointer-events-none">
+                নতুন: <span id="lblAfterSize">0 KB</span>
+              </div>
+  
+              <!-- Slider Divider & Knob -->
+              <div id="compareDivider" class="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_10px_rgba(0,0,0,0.8)] pointer-events-none" style="left: 50%;">
+                <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-white text-slate-900 shadow-lg flex items-center justify-center">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l-3 3 3 3m8-6l3 3-3 3" />
+                  </svg>
+                </div>
+              </div>
+  
+              <!-- Processing Overlay -->
+              <div id="previewLoader" class="hidden absolute inset-0 bg-slate-950/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-10">
+                <div class="w-8 h-8 border-3 border-sky-400 border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-xs font-medium text-sky-200">কম্প্রেস হচ্ছে...</span>
+              </div>
+            </div>
+  
+            <p class="text-[11px] text-center text-slate-400">
+              স্লাইডার ডানে-বামে টেনে আসল ও নতুন ছবির মান তুলনা করুন
+            </p>
+          </section>
+  
+          <!-- Batch Summary Banner (Only for Bulk > 1 image) -->
+          <section id="bulkSummary" class="hidden glass-card rounded-2xl px-4 py-3 flex items-center justify-between">
+            <div>
+              <p class="text-[11px] text-slate-400">মোট <span id="bulkCount" class="text-white font-semibold">0</span>টি ছবি</p>
+              <p class="text-xs font-semibold text-white">
+                <span id="bulkOrigTotal">0 MB</span> → <span id="bulkCompTotal" class="text-sky-400">0 MB</span>
+              </p>
+            </div>
+            <div class="text-right">
+              <span id="bulkSavedPercent" class="inline-block px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-bold">
+                0% সেভ
+              </span>
+            </div>
+          </section>
+  
+          <!-- Compression Controls Card -->
+          <section class="glass-card rounded-3xl p-4 space-y-4">
+            <!-- Mode Switcher (Android Segmented Pill) -->
+            <div class="grid grid-cols-2 p-1 rounded-2xl bg-slate-950/70 border border-white/5">
+              <button
+                id="tabPercent"
+                type="button"
+                class="py-2.5 rounded-xl text-xs font-semibold transition-all bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow"
+              >
+                পার্সেন্টেজ (%)
+              </button>
+              <button
+                id="tabTarget"
+                type="button"
+                class="py-2.5 rounded-xl text-xs font-semibold transition-all text-slate-400"
+              >
+                টার্গেট সাইজ (KB/MB)
+              </button>
+            </div>
+  
+            <!-- Percentage Mode Controls -->
+            <div id="panelPercent" class="space-y-3">
+              <div class="flex items-center justify-between">
+                <label for="qualitySlider" class="text-xs font-medium text-slate-300">কোয়ালিটি লেভেল</label>
+                <span id="qualityValueLabel" class="text-sm font-bold text-sky-400 bg-sky-500/15 px-3 py-0.5 rounded-full">75%</span>
+              </div>
+              <input id="qualitySlider" type="range" min="5" max="100" step="1" value="75" class="android-slider" />
+              <div class="grid grid-cols-4 gap-2 pt-1">
+                <button type="button" data-preset-percent="25" class="preset-percent tap-scale py-1.5 rounded-xl bg-white/5 text-xs text-slate-300 border border-white/5">25%</button>
+                <button type="button" data-preset-percent="50" class="preset-percent tap-scale py-1.5 rounded-xl bg-white/5 text-xs text-slate-300 border border-white/5">50%</button>
+                <button type="button" data-preset-percent="75" class="preset-percent tap-scale py-1.5 rounded-xl bg-sky-500/20 text-xs text-sky-300 border border-sky-400/30">75%</button>
+                <button type="button" data-preset-percent="90" class="preset-percent tap-scale py-1.5 rounded-xl bg-white/5 text-xs text-slate-300 border border-white/5">90%</button>
+              </div>
+            </div>
+  
+            <!-- Target Size Mode Controls -->
+            <div id="panelTarget" class="hidden space-y-3">
+              <label class="text-xs font-medium text-slate-300 block">কাঙ্ক্ষিত সর্বোচ্চ ফাইল সাইজ</label>
+              <div class="flex items-center gap-2">
+                <input
+                  id="targetSizeInput"
+                  type="number"
+                  min="10"
+                  step="any"
+                  value="200"
+                  inputmode="decimal"
+                  placeholder="যেমন: 200"
+                  class="flex-1 bg-slate-950/75 border border-white/10 rounded-2xl px-4 py-3 text-sm font-semibold text-white outline-none focus:border-sky-400"
+                />
+                <div class="grid grid-cols-2 p-1 rounded-2xl bg-slate-950/75 border border-white/10 shrink-0">
+                  <button id="unitKB" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-500 text-white">KB</button>
+                  <button id="unitMB" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-400">MB</button>
+                </div>
+              </div>
+              <div class="grid grid-cols-4 gap-2">
+                <button type="button" data-preset-size="100" data-preset-unit="KB" class="preset-size tap-scale py-1.5 rounded-xl bg-white/5 text-[11px] text-slate-300 border border-white/5">100 KB</button>
+                <button type="button" data-preset-size="200" data-preset-unit="KB" class="preset-size tap-scale py-1.5 rounded-xl bg-white/5 text-[11px] text-slate-300 border border-white/5">200 KB</button>
+                <button type="button" data-preset-size="500" data-preset-unit="KB" class="preset-size tap-scale py-1.5 rounded-xl bg-white/5 text-[11px] text-slate-300 border border-white/5">500 KB</button>
+                <button type="button" data-preset-size="1" data-preset-unit="MB" class="preset-size tap-scale py-1.5 rounded-xl bg-white/5 text-[11px] text-slate-300 border border-white/5">1 MB</button>
+              </div>
+            </div>
+  
+            <!-- Divider -->
+            <div class="h-px bg-white/10"></div>
+  
+            <!-- Output Format Selector -->
+            <div class="space-y-2">
+              <span class="text-xs font-medium text-slate-300 block">আউটপুট ফরম্যাট</span>
+              <div class="grid grid-cols-4 gap-2" id="formatSelector">
+                <button type="button" data-format="original" class="format-btn tap-scale py-2.5 rounded-xl text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-400/40">Original</button>
+                <button type="button" data-format="image/jpeg" class="format-btn tap-scale py-2.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 border border-white/5">JPG</button>
+                <button type="button" data-format="image/png" class="format-btn tap-scale py-2.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 border border-white/5">PNG</button>
+                <button type="button" data-format="image/webp" class="format-btn tap-scale py-2.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 border border-white/5">WebP</button>
+              </div>
+            </div>
+          </section>
+  
+        </div>
+      </main>
+  
+      <!-- Sticky Native Bottom Action Bar -->
+      <footer
+        id="bottomActionBar"
+        class="hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 glass-bar border-t px-4 pt-3"
+        style="padding-bottom: calc(var(--safe-bottom) + 12px);"
+      >
+        <div class="flex items-center gap-2.5">
+          <button
+            id="btnDownloadSingle"
+            type="button"
+            class="tap-scale flex-1 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold text-sm shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span id="btnDownloadSingleText">ছবি সেভ করুন</span>
+          </button>
+  
+          <button
+            id="btnDownloadZip"
+            type="button"
+            class="hidden tap-scale flex-1 py-3.5 px-4 rounded-2xl bg-emerald-500 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+            </svg>
+            <span id="btnDownloadZipText">সব ZIP (0)</span>
+          </button>
+        </div>
+      </footer>
+  
+      <!-- Android Toast / Snackbar -->
+      <div
+        id="snackbar"
+        class="pointer-events-none fixed left-1/2 -translate-x-1/2 bottom-24 z-50 w-[90%] max-w-sm opacity-0 translate-y-3 transition-all duration-200"
+      >
+        <div class="bg-slate-800/95 border border-white/10 text-white text-xs font-medium px-4 py-3 rounded-2xl shadow-2xl text-center backdrop-blur-md">
+          <span id="snackbarMsg"></span>
+        </div>
+      </div>
+  
+      <!-- Custom In-App Update Bottom Sheet Modal -->
+      <div id="updateModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-slate-950/75 backdrop-blur-sm">
+        <div
+          class="bottom-sheet-enter w-full max-w-md glass-bar border-t border-white/15 rounded-t-[28px] p-5 space-y-4"
+          style="padding-bottom: calc(var(--safe-bottom) + 20px);"
+        >
+          <!-- Drag Handle -->
+          <div class="w-12 h-1.5 rounded-full bg-white/20 mx-auto"></div>
+  
+          <div class="flex items-start gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-sky-500 flex items-center justify-center text-slate-950 shrink-0 shadow-lg">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-white">নতুন আপডেট পাওয়া গেছে!</h3>
+              <p class="text-xs text-slate-300 mt-0.5">
+                বর্তমান: <span id="updCurrentVer" class="text-slate-400">v1.0.0</span> → নতুন:
+                <span id="updNewVer" class="text-emerald-400 font-bold">v1.1.0</span>
+              </p>
+            </div>
+          </div>
+  
+          <!-- Changelog Box -->
+          <div class="rounded-2xl bg-slate-950/60 border border-white/10 p-3.5 max-h-44 overflow-y-auto">
+            <p class="text-[11px] font-semibold text-sky-400 mb-2">নতুন যা থাকছে (Changelog):</p>
+            <ul id="updChangelogList" class="space-y-1.5 text-xs text-slate-200 list-disc pl-4"></ul>
+          </div>
+  
+          <!-- Action Buttons -->
+          <div class="space-y-2 pt-1">
+            <button
+              id="btnUpdateNow"
+              type="button"
+              class="tap-scale w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-sky-500 text-slate-950 font-bold text-sm shadow-lg"
+            >
+              এখনই আপডেট করুন (Update Now)
+            </button>
+            <button
+              id="btnUpdateLater"
+              type="button"
+              class="tap-scale w-full py-3 rounded-2xl bg-white/5 text-slate-300 font-medium text-xs"
+            >
+              পরে করবো
+            </button>
+          </div>
+        </div>
+      </div>
+  
+    </div>
+  
+    <script>
+      (() => {
+        'use strict';
+  
+        // =========================================================================
+        // 1. APP & IN-APP UPDATE CONFIGURATION (সহজে কনফিগারযোগ্য কনস্ট্যান্ট)
+        // =========================================================================
+        const APP_CONFIG = {
+          CURRENT_VERSION_NAME: '1.0.0',
+          CURRENT_VERSION_CODE: 1,
+          // আপনার GitHub রিপোজিটরির Raw version.json লিংক এখানে বসান:
+          VERSION_JSON_URL: 'https://raw.githubusercontent.com/YOUR_USERNAME/pro-photo-compressor-studio/main/version.json',
+          UPDATE_FETCH_TIMEOUT_MS: 8000,
+        };
+  
+        // =========================================================================
+        // 2. APPLICATION STATE
+        // =========================================================================
+        const state = {
+          items: [], // { id, file, originalUrl, compressedFile, compressedUrl, status, error, jobId }
+          activeId: null,
+          mode: 'percent', // 'percent' | 'target'
+          percent: 75,
+          targetSize: 200,
+          targetUnit: 'KB', // 'KB' | 'MB'
+          format: 'original', // 'original' | 'image/jpeg' | 'image/png' | 'image/webp'
+          sliderPos: 50,
+          remoteUpdate: null,
+        };
+  
+        // DOM References
+        const els = {
+          appVersionBadge: document.getElementById('appVersionBadge'),
+          btnCheckUpdate: document.getElementById('btnCheckUpdate'),
+          updateDot: document.getElementById('updateDot'),
+          btnClearAll: document.getElementById('btnClearAll'),
+          fileInput: document.getElementById('fileInput'),
+          dropZone: document.getElementById('dropZone'),
+          btnSelectFiles: document.getElementById('btnSelectFiles'),
+          btnAddMore: document.getElementById('btnAddMore'),
+          workspace: document.getElementById('workspace'),
+          thumbnailStrip: document.getElementById('thumbnailStrip'),
+          activeFileName: document.getElementById('activeFileName'),
+          activeSavedBadge: document.getElementById('activeSavedBadge'),
+          compareStage: document.getElementById('compareStage'),
+          imgBefore: document.getElementById('imgBefore'),
+          imgAfter: document.getElementById('imgAfter'),
+          beforeClip: document.getElementById('beforeClip'),
+          compareDivider: document.getElementById('compareDivider'),
+          lblBeforeSize: document.getElementById('lblBeforeSize'),
+          lblAfterSize: document.getElementById('lblAfterSize'),
+          previewLoader: document.getElementById('previewLoader'),
+          bulkSummary: document.getElementById('bulkSummary'),
+          bulkCount: document.getElementById('bulkCount'),
+          bulkOrigTotal: document.getElementById('bulkOrigTotal'),
+          bulkCompTotal: document.getElementById('bulkCompTotal'),
+          bulkSavedPercent: document.getElementById('bulkSavedPercent'),
+          tabPercent: document.getElementById('tabPercent'),
+          tabTarget: document.getElementById('tabTarget'),
+          panelPercent: document.getElementById('panelPercent'),
+          panelTarget: document.getElementById('panelTarget'),
+          qualitySlider: document.getElementById('qualitySlider'),
+          qualityValueLabel: document.getElementById('qualityValueLabel'),
+          targetSizeInput: document.getElementById('targetSizeInput'),
+          unitKB: document.getElementById('unitKB'),
+          unitMB: document.getElementById('unitMB'),
+          formatSelector: document.getElementById('formatSelector'),
+          bottomActionBar: document.getElementById('bottomActionBar'),
+          btnDownloadSingle: document.getElementById('btnDownloadSingle'),
+          btnDownloadSingleText: document.getElementById('btnDownloadSingleText'),
+          btnDownloadZip: document.getElementById('btnDownloadZip'),
+          btnDownloadZipText: document.getElementById('btnDownloadZipText'),
+          snackbar: document.getElementById('snackbar'),
+          snackbarMsg: document.getElementById('snackbarMsg'),
+          updateModal: document.getElementById('updateModal'),
+          updCurrentVer: document.getElementById('updCurrentVer'),
+          updNewVer: document.getElementById('updNewVer'),
+          updChangelogList: document.getElementById('updChangelogList'),
+          btnUpdateNow: document.getElementById('btnUpdateNow'),
+          btnUpdateLater: document.getElementById('btnUpdateLater'),
+        };
+  
+        // =========================================================================
+        // 3. UTILITIES (Debounce, Size Formatter, Blob Cleanup, Snackbar)
+        // =========================================================================
+        let snackbarTimer = null;
+        function showToast(message, duration = 2600) {
+          els.snackbarMsg.textContent = message;
+          els.snackbar.classList.remove('opacity-0', 'translate-y-3');
+          els.snackbar.classList.add('opacity-100', 'translate-y-0');
+          clearTimeout(snackbarTimer);
+          snackbarTimer = setTimeout(() => {
+            els.snackbar.classList.add('opacity-0', 'translate-y-3');
+            els.snackbar.classList.remove('opacity-100', 'translate-y-0');
+          }, duration);
+        }
+  
+        function debounce(fn, delay = 260) {
+          let timer;
+          return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn(...args), delay);
+          };
+        }
+  
+        function formatBytes(bytes) {
+          if (!bytes || bytes <= 0) return '0 B';
+          const k = 1024;
+          const sizes = ['B', 'KB', 'MB', 'GB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return `${(bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1)} ${sizes[i]}`;
+        }
+  
+        function revokeItemUrls(item, onlyCompressed = false) {
+          if (!item) return;
+          if (!onlyCompressed && item.originalUrl) {
+            URL.revokeObjectURL(item.originalUrl);
+            item.originalUrl = null;
+          }
+          if (item.compressedUrl) {
+            URL.revokeObjectURL(item.compressedUrl);
+            item.compressedUrl = null;
+          }
+        }
+  
+        function getExtensionFromMime(mime, fallbackName) {
+          const map = {
+            'image/jpeg': 'jpg',
+            'image/jpg': 'jpg',
+            'image/png': 'png',
+            'image/webp': 'webp',
+          };
+          if (map[mime]) return map[mime];
+          const parts = (fallbackName || '').split('.');
+          return parts.length > 1 ? parts.pop().toLowerCase() : 'jpg';
+        }
+  
+        function buildOutputFilename(originalName, mime) {
+          const base = originalName.replace(/\.[^/.]+$/, '');
+          const ext = getExtensionFromMime(mime, originalName);
+          return `${base}_compressed.${ext}`;
+        }
+  
+        function blobToBase64(blob) {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const res = reader.result || '';
+              resolve(String(res).split(',')[1] || '');
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        }
+  
+        // =========================================================================
+        // 4. CAPACITOR NATIVE STATUS BAR & SAVE/DOWNLOAD HANDLER
+        // =========================================================================
+        async function initCapacitorNativeUI() {
+          try {
+            const cap = window.Capacitor;
+            if (!cap || !cap.isNativePlatform || !cap.isNativePlatform()) return;
+            const StatusBar = cap.Plugins?.StatusBar;
+            if (StatusBar) {
+              await StatusBar.setBackgroundColor({ color: '#0f172a' });
+              await StatusBar.setStyle({ style: 'DARK' });
+            }
+          } catch (_) {
+            // Silently ignore if StatusBar plugin is unavailable
+          }
+        }
+  
+        async function saveBlobFile(blob, filename) {
+          const cap = window.Capacitor;
+          const isNative = Boolean(cap && cap.isNativePlatform && cap.isNativePlatform());
+  
+          // Native Android Save + Share via Capacitor Plugins (if installed)
+          if (isNative && cap.Plugins?.Filesystem) {
+            try {
+              const base64Data = await blobToBase64(blob);
+              const path = `PhotoCompressor/${filename}`;
+              const saved = await cap.Plugins.Filesystem.writeFile({
+                path,
+                data: base64Data,
+                directory: 'DOCUMENTS',
+                recursive: true,
+              });
+  
+              showToast(`সেভ হয়েছে: Documents/${path}`);
+  
+              // Optional: Offer Native Android Share Sheet if Share plugin exists
+              if (cap.Plugins?.Share && saved?.uri) {
+                try {
+                  await cap.Plugins.Share.share({
+                    title: filename,
+                    url: saved.uri,
+                    dialogTitle: 'ছবি শেয়ার বা সেভ করুন',
+                  });
+                } catch (_) {
+                  // User cancelled share sheet; file is already saved in Documents
+                }
+              }
+              return;
+            } catch (err) {
+              console.warn('Capacitor Filesystem fallback to Web download:', err);
+            }
+          }
+  
+          // Web / Standard Blob Download
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 4000);
+          showToast(`${filename} ডাউনলোড শুরু হয়েছে`);
+        }
+  
+        // =========================================================================
+        // 5. CORE IMAGE COMPRESSION ENGINE
+        // =========================================================================
+        function getCompressionOptions(file) {
+          const targetMime = state.format === 'original' ? (file.type || 'image/jpeg') : state.format;
+          const originalMB = file.size / (1024 * 1024);
+  
+          const baseOptions = {
+            useWebWorker: true,
+            fileType: targetMime,
+            maxIteration: 12,
+            alwaysKeepResolution: false,
+          };
+  
+          if (state.mode === 'percent') {
+            const quality = Math.min(1, Math.max(0.05, state.percent / 100));
+            return {
+              ...baseOptions,
+              initialQuality: quality,
+              // Ensure high percentage doesn't artificially over-shrink, low percentage actually shrinks
+              maxSizeMB: state.percent >= 95 ? Math.max(originalMB * 1.5, 5) : Math.max(0.03, originalMB * quality),
+              alwaysKeepResolution: state.percent >= 40,
+            };
+          }
+  
+          // Target Size Mode
+          const rawVal = parseFloat(state.targetSize);
+          const safeVal = Number.isFinite(rawVal) && rawVal > 0 ? rawVal : 200;
+          const maxSizeMB = state.targetUnit === 'MB' ? safeVal : safeVal / 1024;
+  
+          return {
+            ...baseOptions,
+            maxSizeMB: Math.max(0.01, maxSizeMB),
+            initialQuality: 0.85,
+            maxIteration: 16,
+          };
+        }
+  
+        async function compressSingleItem(item) {
+          if (!item || !item.file) return;
+          const currentJob = (item.jobId || 0) + 1;
+          item.jobId = currentJob;
+          item.status = 'processing';
+          item.error = null;
+  
+          renderUI();
+  
+          try {
+            if (typeof imageCompression !== 'function') {
+              throw new Error('কম্প্রেশন লাইব্রেরি লোড হয়নি। ইন্টারনেট সংযোগ চেক করুন।');
+            }
+  
+            const options = getCompressionOptions(item.file);
+            const outputBlob = await imageCompression(item.file, options);
+  
+            // Discard stale job result if user changed slider quickly
+            if (item.jobId !== currentJob) return;
+  
+            revokeItemUrls(item, true);
+            item.compressedFile = outputBlob;
+            item.compressedUrl = URL.createObjectURL(outputBlob);
+            item.status = 'done';
+          } catch (err) {
+            if (item.jobId !== currentJob) return;
+            console.error('Compression error:', err);
+            item.status = 'error';
+            item.error = err?.message || 'কম্প্রেস করতে সমস্যা হয়েছে';
+            showToast(item.error);
+          } finally {
+            if (item.jobId === currentJob) {
+              renderUI();
+            }
+          }
+        }
+  
+        async function compressAllItems() {
+          if (!state.items.length) return;
+          // Prioritize active image first for instant realtime preview
+          const active = state.items.find((i) => i.id === state.activeId);
+          if (active) {
+            await compressSingleItem(active);
+          }
+          // Compress remaining items sequentially to keep Android RAM usage safe
+          for (const item of state.items) {
+            if (item.id !== state.activeId) {
+              await compressSingleItem(item);
+            }
+          }
+        }
+  
+        const debouncedCompressAll = debounce(() => {
+          compressAllItems();
+        }, 280);
+  
+        // =========================================================================
+        // 6. FILE INGESTION & STATE MANAGEMENT
+        // =========================================================================
+        function handleFiles(fileList) {
+          const files = Array.from(fileList || []).filter((f) => f.type && f.type.startsWith('image/'));
+          if (!files.length) {
+            showToast('সঠিক ছবি (JPG, PNG, WebP) সিলেক্ট করুন');
+            return;
+          }
+  
+          const newItems = files.map((file) => ({
+            id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+            file,
+            originalUrl: URL.createObjectURL(file),
+            compressedFile: null,
+            compressedUrl: null,
+            status: 'pending',
+            error: null,
+            jobId: 0,
+          }));
+  
+          state.items.push(...newItems);
+          if (!state.activeId) {
+            state.activeId = newItems[0].id;
+          }
+  
+          renderUI();
+  
+          // Compress newly added items
+          (async () => {
+            for (const item of newItems) {
+              await compressSingleItem(item);
+            }
+          })();
+        }
+  
+        function removeItem(id) {
+          const idx = state.items.findIndex((i) => i.id === id);
+          if (idx === -1) return;
+          revokeItemUrls(state.items[idx], false);
+          state.items.splice(idx, 1);
+  
+          if (state.activeId === id) {
+            state.activeId = state.items[0]?.id || null;
+          }
+          renderUI();
+        }
+  
+        function clearAllItems() {
+          state.items.forEach((item) => revokeItemUrls(item, false));
+          state.items = [];
+          state.activeId = null;
+          els.fileInput.value = '';
+          renderUI();
+          showToast('সব ছবি মুছে ফেলা হয়েছে');
+        }
+  
+        // =========================================================================
+        // 7. UI RENDERING
+        // =========================================================================
+        function updateComparisonSlider(percent) {
+          state.sliderPos = Math.min(100, Math.max(0, percent));
+          els.beforeClip.style.clipPath = `inset(0 ${100 - state.sliderPos}% 0 0)`;
+          els.compareDivider.style.left = `${state.sliderPos}%`;
+        }
+  
+        function renderThumbnails() {
+          els.thumbnailStrip.innerHTML = '';
+          state.items.forEach((item) => {
+            const isActive = item.id === state.activeId;
+            const wrap = document.createElement('div');
+            wrap.className = `relative shrink-0 w-16 h-16 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${
+              isActive ? 'border-sky-400 scale-105 shadow-lg shadow-sky-500/30' : 'border-white/10 opacity-75'
+            }`;
+  
+            const img = document.createElement('img');
+            img.src = item.originalUrl;
+            img.alt = item.file.name;
+            img.className = 'w-full h-full object-cover';
+            wrap.appendChild(img);
+  
+            // Status badge
+            if (item.status === 'processing') {
+              const sp = document.createElement('div');
+              sp.className = 'absolute inset-0 bg-slate-950/60 flex items-center justify-center';
+              sp.innerHTML = '<div class="w-4 h-4 border-2 border-sky-400 border-t-transparent rounded-full animate-spin"></div>';
+              wrap.appendChild(sp);
+            } else if (item.status === 'done' && item.compressedFile) {
+              const saved = Math.round(((item.file.size - item.compressedFile.size) / item.file.size) * 100);
+              const badge = document.createElement('span');
+              badge.className = 'absolute bottom-0 inset-x-0 bg-slate-950/80 text-[9px] text-center font-bold py-0.5 ' +
+                (saved >= 0 ? 'text-emerald-300' : 'text-amber-300');
+              badge.textContent = saved >= 0 ? `-${saved}%` : `+${Math.abs(saved)}%`;
+              wrap.appendChild(badge);
+            }
+  
+            // Remove single photo X button
+            const btnDel = document.createElement('button');
+            btnDel.type = 'button';
+            btnDel.className = 'absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-slate-950/85 text-rose-400 flex items-center justify-center text-xs font-bold';
+            btnDel.textContent = '×';
+            btnDel.addEventListener('click', (e) => {
+              e.stopPropagation();
+              removeItem(item.id);
+            });
+            wrap.appendChild(btnDel);
+  
+            wrap.addEventListener('click', () => {
+              state.activeId = item.id;
+              renderUI();
+            });
+  
+            els.thumbnailStrip.appendChild(wrap);
+          });
+        }
+  
+        function renderUI() {
+          const hasItems = state.items.length > 0;
+          els.dropZone.classList.toggle('hidden', hasItems);
+          els.workspace.classList.toggle('hidden', !hasItems);
+          els.bottomActionBar.classList.toggle('hidden', !hasItems);
+          els.btnClearAll.classList.toggle('hidden', !hasItems);
+  
+          if (!hasItems) return;
+  
+          renderThumbnails();
+  
+          const active = state.items.find((i) => i.id === state.activeId) || state.items[0];
+          state.activeId = active.id;
+  
+          els.activeFileName.textContent = active.file.name;
+          els.imgBefore.src = active.originalUrl;
+          els.lblBeforeSize.textContent = formatBytes(active.file.size);
+  
+          if (active.status === 'processing' || active.status === 'pending') {
+            els.previewLoader.classList.remove('hidden');
+            els.activeSavedBadge.textContent = 'প্রসেসিং...';
+            els.activeSavedBadge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300';
+            els.lblAfterSize.textContent = '...';
+          } else if (active.status === 'error') {
+            els.previewLoader.classList.add('hidden');
+            els.activeSavedBadge.textContent = 'ত্রুটি';
+            els.activeSavedBadge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300';
+            els.imgAfter.src = active.originalUrl;
+            els.lblAfterSize.textContent = 'Error';
+          } else {
+            els.previewLoader.classList.add('hidden');
+            els.imgAfter.src = active.compressedUrl || active.originalUrl;
+            const newSize = active.compressedFile?.size || active.file.size;
+            els.lblAfterSize.textContent = formatBytes(newSize);
+  
+            const savedPct = Math.round(((active.file.size - newSize) / active.file.size) * 100);
+            if (savedPct >= 0) {
+              els.activeSavedBadge.textContent = `${savedPct}% কমেছে`;
+              els.activeSavedBadge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300';
+            } else {
+              els.activeSavedBadge.textContent = `${Math.abs(savedPct)}% বেড়েছে`;
+              els.activeSavedBadge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300';
+            }
+          }
+  
+          // Bulk Summary & Action Bar Buttons
+          const isBulk = state.items.length > 1;
+          els.bulkSummary.classList.toggle('hidden', !isBulk);
+          els.btnDownloadZip.classList.toggle('hidden', !isBulk);
+  
+          const readyCount = state.items.filter((i) => i.status === 'done' && i.compressedFile).length;
+          els.btnDownloadSingle.disabled = active.status !== 'done' || !active.compressedFile;
+          els.btnDownloadSingleText.textContent = isBulk ? 'এই ছবি সেভ' : 'ছবি সেভ করুন';
+  
+          if (isBulk) {
+            const origTotal = state.items.reduce((sum, i) => sum + i.file.size, 0);
+            const compTotal = state.items.reduce((sum, i) => sum + (i.compressedFile?.size || i.file.size), 0);
+            const totalSaved = origTotal > 0 ? Math.round(((origTotal - compTotal) / origTotal) * 100) : 0;
+  
+            els.bulkCount.textContent = state.items.length;
+            els.bulkOrigTotal.textContent = formatBytes(origTotal);
+            els.bulkCompTotal.textContent = formatBytes(compTotal);
+            els.bulkSavedPercent.textContent = totalSaved >= 0 ? `${totalSaved}% সেভ` : `+${Math.abs(totalSaved)}%`;
+            els.btnDownloadZip.disabled = readyCount === 0;
+            els.btnDownloadZipText.textContent = `সব ZIP (${readyCount})`;
+          }
+        }
+  
+        // =========================================================================
+        // 8. DOWNLOAD SINGLE & BULK ZIP
+        // =========================================================================
+        async function downloadActiveImage() {
+          const active = state.items.find((i) => i.id === state.activeId);
+          if (!active || !active.compressedFile) return;
+          const filename = buildOutputFilename(active.file.name, active.compressedFile.type);
+          await saveBlobFile(active.compressedFile, filename);
+        }
+  
+        async function downloadAllAsZip() {
+          const doneItems = state.items.filter((i) => i.status === 'done' && i.compressedFile);
+          if (!doneItems.length) return;
+          if (typeof JSZip !== 'function') {
+            showToast('JSZip লোড হয়নি। ইন্টারনেট চেক করুন।');
+            return;
+          }
+  
+          els.btnDownloadZip.disabled = true;
+          els.btnDownloadZipText.textContent = 'ZIP তৈরি হচ্ছে...';
+  
+          try {
+            const zip = new JSZip();
+            const usedNames = new Set();
+  
+            doneItems.forEach((item, index) => {
+              let fname = buildOutputFilename(item.file.name, item.compressedFile.type);
+              if (usedNames.has(fname)) {
+                const dotIdx = fname.lastIndexOf('.');
+                fname = `${fname.slice(0, dotIdx)}_${index + 1}${fname.slice(dotIdx)}`;
+              }
+              usedNames.add(fname);
+              zip.file(fname, item.compressedFile);
+            });
+  
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const zipName = `compressed_photos_${Date.now()}.zip`;
+            await saveBlobFile(zipBlob, zipName);
+          } catch (err) {
+            console.error('ZIP Error:', err);
+            showToast('ZIP তৈরি করতে সমস্যা হয়েছে');
+          } finally {
+            renderUI();
+          }
+        }
+  
+        // =========================================================================
+        // 9. CUSTOM IN-APP UPDATE CHECKER (version.json)
+        // =========================================================================
+        async function checkForAppUpdate(isManual = false) {
+          if (!navigator.onLine) {
+            if (isManual) showToast('ইন্টারনেট সংযোগ নেই');
+            return;
+          }
+  
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), APP_CONFIG.UPDATE_FETCH_TIMEOUT_MS);
+  
+          try {
+            const cacheBusterUrl = `${APP_CONFIG.VERSION_JSON_URL}${APP_CONFIG.VERSION_JSON_URL.includes('?') ? '&' : '?'}t=${Date.now()}`;
+            const res = await fetch(cacheBusterUrl, {
+              method: 'GET',
+              cache: 'no-store',
+              signal: controller.signal,
+            });
+  
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+  
+            const remoteCode = Number(data?.versionCode || 0);
+            if (remoteCode > APP_CONFIG.CURRENT_VERSION_CODE && data?.apk_url) {
+              state.remoteUpdate = data;
+              els.updateDot.classList.remove('hidden');
+              showUpdateModal(data);
+            } else if (isManual) {
+              showToast('আপনি সর্বশেষ ভার্সন ব্যবহার করছেন!');
+            }
+          } catch (err) {
+            // Silent failure on startup so app never crashes or annoys user offline
+            if (isManual) {
+              showToast('আপডেট চেক করা যায়নি, পরে চেষ্টা করুন');
+            }
+            console.debug('Update check skipped:', err?.message);
+          } finally {
+            clearTimeout(timer);
+          }
+        }
+  
+        function showUpdateModal(data) {
+          els.updCurrentVer.textContent = `v${APP_CONFIG.CURRENT_VERSION_NAME}`;
+          els.updNewVer.textContent = `v${data.version || 'New'}`;
+          els.updChangelogList.innerHTML = '';
+  
+          const logs = Array.isArray(data.changelog)
+            ? data.changelog
+            : String(data.changelog || 'পারফরম্যান্স ও বাগ ফিক্স আপডেট।').split('\n');
+  
+          logs.filter(Boolean).forEach((line) => {
+            const li = document.createElement('li');
+            li.textContent = line;
+            els.updChangelogList.appendChild(li);
+          });
+  
+          const isForced = Boolean(data.force_update);
+          els.btnUpdateLater.classList.toggle('hidden', isForced);
+          els.updateModal.classList.remove('hidden');
+        }
+  
+        async function openApkUpdateUrl() {
+          const url = state.remoteUpdate?.apk_url;
+          if (!url) return;
+  
+          try {
+            const cap = window.Capacitor;
+            if (cap?.Plugins?.Browser) {
+              await cap.Plugins.Browser.open({ url });
+              return;
+            }
+          } catch (_) {
+            // Fallback to window.open
+          }
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+  
+        // =========================================================================
+        // 10. EVENT LISTENERS
+        // =========================================================================
+        function bindEvents() {
+          els.appVersionBadge.textContent = `v${APP_CONFIG.CURRENT_VERSION_NAME}`;
+  
+          // File Picker Triggers
+          const openPicker = () => els.fileInput.click();
+          els.btnSelectFiles.addEventListener('click', (e) => { e.stopPropagation(); openPicker(); });
+          els.dropZone.addEventListener('click', openPicker);
+          els.btnAddMore.addEventListener('click', openPicker);
+          els.fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+            e.target.value = '';
+          });
+  
+          // Drag & Drop Support
+          ['dragenter', 'dragover'].forEach((evt) => {
+            els.dropZone.addEventListener(evt, (e) => {
+              e.preventDefault();
+              els.dropZone.classList.add('border-sky-400', 'bg-sky-500/10');
+            });
+          });
+          ['dragleave', 'drop'].forEach((evt) => {
+            els.dropZone.addEventListener(evt, (e) => {
+              e.preventDefault();
+              els.dropZone.classList.remove('border-sky-400', 'bg-sky-500/10');
+            });
+          });
+          els.dropZone.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
+  
+          // Clear All
+          els.btnClearAll.addEventListener('click', clearAllItems);
+  
+          // Pointer-based Realtime Before/After Slider (Touch + Mouse Smooth)
+          let isDraggingSlider = false;
+          const moveSliderFromClientX = (clientX) => {
+            const rect = els.compareStage.getBoundingClientRect();
+            if (!rect.width) return;
+            const pct = ((clientX - rect.left) / rect.width) * 100;
+            updateComparisonSlider(pct);
+          };
+  
+          els.compareStage.addEventListener('pointerdown', (e) => {
+            isDraggingSlider = true;
+            els.compareStage.setPointerCapture(e.pointerId);
+            moveSliderFromClientX(e.clientX);
+          });
+          els.compareStage.addEventListener('pointermove', (e) => {
+            if (!isDraggingSlider) return;
+            moveSliderFromClientX(e.clientX);
+          });
+          const stopDrag = () => { isDraggingSlider = false; };
+          els.compareStage.addEventListener('pointerup', stopDrag);
+          els.compareStage.addEventListener('pointercancel', stopDrag);
+  
+          // Mode Tabs (Percentage vs Target Size)
+          const setMode = (mode) => {
+            state.mode = mode;
+            const isPercent = mode === 'percent';
+            els.panelPercent.classList.toggle('hidden', !isPercent);
+            els.panelTarget.classList.toggle('hidden', isPercent);
+  
+            els.tabPercent.className = isPercent
+              ? 'py-2.5 rounded-xl text-xs font-semibold transition-all bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow'
+              : 'py-2.5 rounded-xl text-xs font-semibold transition-all text-slate-400';
+            els.tabTarget.className = !isPercent
+              ? 'py-2.5 rounded-xl text-xs font-semibold transition-all bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow'
+              : 'py-2.5 rounded-xl text-xs font-semibold transition-all text-slate-400';
+  
+            debouncedCompressAll();
+          };
+          els.tabPercent.addEventListener('click', () => setMode('percent'));
+          els.tabTarget.addEventListener('click', () => setMode('target'));
+  
+          // Percentage Slider & Presets
+          const updatePercentUI = (val) => {
+            state.percent = Math.min(100, Math.max(5, Number(val)));
+            els.qualitySlider.value = state.percent;
+            els.qualityValueLabel.textContent = `${state.percent}%`;
+            document.querySelectorAll('.preset-percent').forEach((btn) => {
+              const active = Number(btn.dataset.presetPercent) === state.percent;
+              btn.className = active
+                ? 'preset-percent tap-scale py-1.5 rounded-xl bg-sky-500/20 text-xs text-sky-300 border border-sky-400/30'
+                : 'preset-percent tap-scale py-1.5 rounded-xl bg-white/5 text-xs text-slate-300 border border-white/5';
+            });
+            debouncedCompressAll();
+          };
+          els.qualitySlider.addEventListener('input', (e) => updatePercentUI(e.target.value));
+          document.querySelectorAll('.preset-percent').forEach((btn) => {
+            btn.addEventListener('click', () => updatePercentUI(btn.dataset.presetPercent));
+          });
+  
+          // Target Size Input, Unit & Presets
+          const setTargetUnit = (unit) => {
+            state.targetUnit = unit;
+            els.unitKB.className = unit === 'KB'
+              ? 'px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-500 text-white'
+              : 'px-3.5 py-2 rounded-xl text-xs font-bold text-slate-400';
+            els.unitMB.className = unit === 'MB'
+              ? 'px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-500 text-white'
+              : 'px-3.5 py-2 rounded-xl text-xs font-bold text-slate-400';
+            debouncedCompressAll();
+          };
+          els.unitKB.addEventListener('click', () => setTargetUnit('KB'));
+          els.unitMB.addEventListener('click', () => setTargetUnit('MB'));
+          els.targetSizeInput.addEventListener('input', (e) => {
+            state.targetSize = e.target.value;
+            debouncedCompressAll();
+          });
+          document.querySelectorAll('.preset-size').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              state.targetSize = Number(btn.dataset.presetSize);
+              els.targetSizeInput.value = state.targetSize;
+              setTargetUnit(btn.dataset.presetUnit);
+            });
+          });
+  
+          // Output Format Buttons
+          els.formatSelector.querySelectorAll('.format-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              state.format = btn.dataset.format;
+              els.formatSelector.querySelectorAll('.format-btn').forEach((b) => {
+                const active = b.dataset.format === state.format;
+                b.className = active
+                  ? 'format-btn tap-scale py-2.5 rounded-xl text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-400/40'
+                  : 'format-btn tap-scale py-2.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 border border-white/5';
+              });
+              debouncedCompressAll();
+            });
+          });
+  
+          // Download Buttons
+          els.btnDownloadSingle.addEventListener('click', downloadActiveImage);
+          els.btnDownloadZip.addEventListener('click', downloadAllAsZip);
+  
+          // Update Modal Events
+          els.btnCheckUpdate.addEventListener('click', () => {
+            if (state.remoteUpdate) {
+              showUpdateModal(state.remoteUpdate);
+            } else {
+              checkForAppUpdate(true);
+            }
+          });
+          els.btnUpdateNow.addEventListener('click', openApkUpdateUrl);
+          els.btnUpdateLater.addEventListener('click', () => {
+            els.updateModal.classList.add('hidden');
+          });
+  
+          // Cleanup all Blob URLs on app close
+          window.addEventListener('beforeunload', () => {
+            state.items.forEach((item) => revokeItemUrls(item, false));
+          });
+        }
+  
+        // =========================================================================
+        // 11. BOOTSTRAP APP
+        // =========================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+          bindEvents();
+          initCapacitorNativeUI();
+          // অ্যাপ ওপেন হওয়ার ১.৫ সেকেন্ড পর ব্যাকগ্রাউন্ডে আপডেট চেক করবে
+          setTimeout(() => checkForAppUpdate(false), 1500);
+        });
+      })();
+    </script>
+  </body>
+  </html>
