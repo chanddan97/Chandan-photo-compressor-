@@ -1,594 +1,772 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="color-scheme" content="light dark" />
-  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#1A1816" media="(prefers-color-scheme: dark)" />
-  <meta name="author" content="Chandan Das" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2028%2028'%3E%3Crect%20width='28'%20height='28'%20rx='8'%20fill='%23D9480F'/%3E%3Cpath%20d='M8.5%2012V8.5H12M19.5%2012V8.5H16M8.5%2016v3.5H12M19.5%2016v3.5H16'%20stroke='white'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%20fill='none'/%3E%3Crect%20x='12'%20y='12'%20width='4'%20height='4'%20rx='1'%20fill='white'/%3E%3C/svg%3E" />
-  <meta name="application-name" content="Photo Compressor" />
-  <title>Photo Compressor by Chandan Das</title>
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#0B0D13" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#F8FAFC" media="(prefers-color-scheme: light)" />
+  <title>Photo Compressor Pro • ফটো কম্প্রেসার প্রো</title>
 
-  <!-- Optional: bundle this font locally inside the APK for fully offline use. The UI falls back to system Bengali fonts. -->
+  <!-- Google Font: Hind Siliguri for Bengali & Inter for modern UI -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
-    /* ------------------------------------------------------------------
-       Design tokens
-       One accent colour, neutral surfaces, 4/8px spacing, system theme.
-    ------------------------------------------------------------------ */
+    /* ==================================================================
+       1. Modern Design Tokens & Glassmorphism Theme System
+    ================================================================== */
     :root {
-      color-scheme: light dark;
+      --primary: #FF5722;
+      --primary-glow: rgba(255, 87, 34, 0.45);
+      --primary-gradient: linear-gradient(135deg, #FF5722 0%, #FF8A50 100%);
+      --accent-cyan: #06B6D4;
+      --accent-cyan-glow: rgba(6, 182, 212, 0.4);
+      --accent-indigo: #6366F1;
+      
+      --ok: #10B981;
+      --ok-soft: rgba(16, 185, 129, 0.15);
+      --warn: #F59E0B;
+      --warn-soft: rgba(245, 158, 11, 0.15);
+      --err: #EF4444;
+      --err-soft: rgba(239, 68, 68, 0.15);
 
-      --bg: #F6F4F1;
-      --surface: #FFFFFF;
-      --surface-2: #EFECE7;
-      --line: #E6E2DC;
-      --line-strong: #D3CEC6;
-      --text: #1C1A17;
-      --text-2: #6A645B;
-      --accent: #D9480F;
-      --accent-ink: #FFFFFF;
-      --accent-soft: #FFEDE2;
-      --seg-selected: #FFFFFF;
-      --ok: #157A4B;
-      --ok-soft: #E3F4EB;
-      --warn: #9A5B00;
-      --warn-soft: #FBEFD9;
-      --err: #B3261E;
-      --err-soft: #FCE9E7;
-      --scrim: rgba(10, 14, 20, 0.5);
-      --demo-sky: #FBE3C8; --demo-sun: #F08A3C; --demo-hill: #5E8C7A; --demo-hill-2: #3F6B5D;
+      --r-xs: 6px;
+      --r-sm: 10px;
+      --r-md: 16px;
+      --r-lg: 24px;
+      --r-full: 9999px;
 
-      --r-sm: 8px;
-      --r-md: 12px;
-      --r-lg: 20px;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --bar-h: 76px;
+      --bar-h: 80px;
 
-      --font: 'Hind Siliguri', 'Noto Sans Bengali', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      --font-bn: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-en: 'Plus Jakarta Sans', system-ui, sans-serif;
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #121110;
-        --surface: #1A1816;
-        --surface-2: #25221F;
-        --line: #2E2B27;
-        --line-strong: #403C36;
-        --text: #F1EEE9;
-        --text-2: #A39C91;
-        --accent: #FF9157;
-        --accent-ink: #1E0F05;
-        --accent-soft: #3A2416;
-        --seg-selected: #3A3631;
-        --ok: #5FD39A;
-        --ok-soft: #14291F;
-        --warn: #F0B35A;
-        --warn-soft: #2E2412;
-        --err: #FF8A80;
-        --err-soft: #33191A;
-        --scrim: rgba(0, 0, 0, 0.62);
-        --demo-sky: #3A2A1E; --demo-sun: #FF9157; --demo-hill: #3F6455; --demo-hill-2: #2C4A3F;
-      }
+    /* Dark Mode Defaults (Modern Obsidian Theme) */
+    html[data-theme="dark"] {
+      --bg-base: #0B0E14;
+      --bg-surface: rgba(18, 22, 33, 0.85);
+      --bg-surface-elevated: #161B29;
+      --bg-surface-secondary: #1F263B;
+      --line: rgba(255, 255, 255, 0.08);
+      --line-strong: rgba(255, 255, 255, 0.18);
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+      --scrim: rgba(5, 7, 12, 0.8);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --shadow-card: 0 16px 36px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
     }
 
-    /* ------------------------------------------------------------------
-       Base
-    ------------------------------------------------------------------ */
+    /* Light Mode */
+    html[data-theme="light"] {
+      --bg-base: #F8FAFC;
+      --bg-surface: rgba(255, 255, 255, 0.9);
+      --bg-surface-elevated: #FFFFFF;
+      --bg-surface-secondary: #EDF2F7;
+      --line: rgba(0, 0, 0, 0.08);
+      --line-strong: rgba(0, 0, 0, 0.16);
+      --text: #0F172A;
+      --text-muted: #475569;
+      --text-dim: #94A3B8;
+      --scrim: rgba(15, 23, 42, 0.6);
+      --glass-border: rgba(0, 0, 0, 0.08);
+      --shadow-card: 0 16px 36px -10px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Base Reset */
     *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     [hidden] { display: none !important; }
 
-    html, body { margin: 0; padding: 0; }
     body {
-      background: var(--bg);
+      margin: 0; padding: 0;
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(255, 87, 34, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(6, 182, 212, 0.06) 0%, transparent 40%);
+      background-attachment: fixed;
       color: var(--text);
-      font-family: var(--font);
+      font-family: var(--font-bn);
       font-size: 15px;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       overscroll-behavior-y: contain;
+      min-height: 100dvh;
     }
+
     button, input { font: inherit; color: inherit; }
     button { cursor: pointer; border: 0; background: none; padding: 0; }
     img { display: block; }
     h1, h2, h3, p, ul { margin: 0; padding: 0; }
     ul { list-style: none; }
-
-    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 
     .icon {
       width: 20px; height: 20px; flex: none;
-      fill: none; stroke: currentColor; stroke-width: 1.8;
+      fill: none; stroke: currentColor; stroke-width: 1.9;
       stroke-linecap: round; stroke-linejoin: round;
     }
 
-    .app { max-width: 560px; min-height: 100dvh; margin: 0 auto; display: flex; flex-direction: column; }
+    .app {
+      max-width: 580px;
+      min-height: 100dvh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
 
-    /* ------------------------------------------------------------------
-       App bar
-    ------------------------------------------------------------------ */
+    /* ==================================================================
+       2. Flashing Splash Screen & Intro Watermark Screen
+    ================================================================== */
+    .splash-screen {
+      position: fixed; inset: 0; z-index: 100;
+      background: #0B0E14;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .splash-screen.is-hidden {
+      opacity: 0;
+      transform: scale(1.05);
+      pointer-events: none;
+    }
+    .splash-ambient {
+      position: absolute; width: 340px; height: 340px; border-radius: 50%;
+      background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+      filter: blur(40px); animation: pulseAmbient 2.5s infinite alternate ease-in-out;
+    }
+    .splash-flash-beam {
+      position: absolute; top: -100%; left: -100%; width: 300%; height: 300%;
+      background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.08) 50%, transparent 60%);
+      animation: flashSweep 2.8s infinite ease-in-out;
+      pointer-events: none;
+    }
+    .splash-card {
+      position: relative; z-index: 2;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      padding: 32px 24px;
+    }
+    .splash-logo-box {
+      position: relative; width: 92px; height: 92px; margin-bottom: 24px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .splash-logo-rings {
+      position: absolute; inset: -12px; border-radius: 32px;
+      border: 2px dashed rgba(255, 87, 34, 0.4);
+      animation: rotateRings 12s linear infinite;
+    }
+    .splash-logo-inner {
+      width: 80px; height: 80px; border-radius: 26px;
+      background: var(--primary-gradient);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 10px 28px var(--primary-glow);
+      animation: pulseLogo 2s infinite alternate ease-in-out;
+    }
+    .splash-logo-inner svg { width: 44px; height: 44px; color: #FFF; }
+    .splash-title {
+      font-size: 26px; font-weight: 700; color: #FFF; letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+    .splash-sub {
+      font-size: 13px; color: var(--accent-cyan); font-weight: 600;
+      letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 24px;
+      font-family: var(--font-en);
+    }
+    .splash-chips {
+      display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 28px;
+    }
+    .splash-chip {
+      padding: 4px 12px; border-radius: var(--r-full);
+      background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 12px; color: #CBD5E1; font-weight: 500;
+    }
+    .splash-loader-bar {
+      width: 160px; height: 4px; border-radius: 2px;
+      background: rgba(255, 255, 255, 0.1); overflow: hidden; position: relative;
+    }
+    .splash-loader-bar::after {
+      content: ""; position: absolute; inset: 0; width: 45%; border-radius: 2px;
+      background: var(--primary-gradient);
+      animation: indetBar 1.2s infinite ease-in-out;
+    }
+    .splash-tap-hint {
+      margin-top: 16px; font-size: 12px; color: #64748B;
+    }
+
+    @keyframes pulseAmbient { 0% { opacity: 0.4; transform: scale(0.9); } 100% { opacity: 0.9; transform: scale(1.15); } }
+    @keyframes pulseLogo { 0% { transform: scale(0.96); } 100% { transform: scale(1.04); } }
+    @keyframes rotateRings { 100% { transform: rotate(360deg); } }
+    @keyframes flashSweep { 0% { transform: translate(-30%, -30%) rotate(0deg); } 100% { transform: translate(30%, 30%) rotate(0deg); } }
+    @keyframes indetBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+
+    /* ==================================================================
+       3. Header & App Bar
+    ================================================================== */
     .appbar {
-      position: sticky; top: 0; z-index: 20;
+      position: sticky; top: 0; z-index: 30;
       display: flex; align-items: center; justify-content: space-between;
-      min-height: calc(56px + var(--safe-top));
-      padding: var(--safe-top) 8px 0 20px;
-      background: var(--surface);
+      min-height: calc(62px + var(--safe-top));
+      padding: var(--safe-top) 16px 0;
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--line);
     }
-    .appbar h1 { font-size: 19px; font-weight: 600; letter-spacing: -0.1px; }
-    .appbar__actions { display: flex; gap: 2px; }
+    .brand {
+      display: flex; align-items: center; gap: 12px; cursor: pointer;
+    }
+    .brand__logo {
+      width: 38px; height: 38px; border-radius: 12px;
+      background: var(--primary-gradient);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px var(--primary-glow);
+      transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .brand:hover .brand__logo { transform: scale(1.08) rotate(-4deg); }
+    .brand__logo svg { width: 22px; height: 22px; color: #FFF; }
+    .brand__info { display: flex; flex-direction: column; }
+    .brand__title { font-size: 18px; font-weight: 700; line-height: 1.2; }
+    .brand__sub {
+      font-size: 11px; font-weight: 700; color: var(--accent-cyan);
+      letter-spacing: 0.5px; text-transform: uppercase; font-family: var(--font-en);
+    }
 
+    .appbar__actions { display: flex; align-items: center; gap: 6px; }
     .icon-btn {
       position: relative;
       display: inline-flex; align-items: center; justify-content: center;
-      width: 44px; height: 44px; border-radius: 50%;
-      color: var(--text-2);
-      transition: background-color .15s, color .15s;
+      width: 42px; height: 42px; border-radius: 50%;
+      color: var(--text-muted);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--line);
+      transition: all 0.2s;
     }
-    .icon-btn:hover { background: var(--surface-2); color: var(--text); }
-    .icon-btn:active { background: var(--surface-2); }
+    .icon-btn:hover { color: var(--text); background: var(--bg-surface-secondary); }
+    .icon-btn:active { transform: scale(0.92); }
     .icon-btn__dot {
-      position: absolute; top: 10px; right: 10px;
-      width: 9px; height: 9px; border-radius: 50%;
-      background: var(--accent); border: 2px solid var(--surface);
+      position: absolute; top: 8px; right: 8px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--primary); border: 2px solid var(--bg-surface);
     }
 
-    /* ------------------------------------------------------------------
-       Layout
-    ------------------------------------------------------------------ */
-    main { flex: 1; padding: 16px 16px 24px; display: flex; flex-direction: column; gap: 12px; }
-    body.has-items main { padding-bottom: calc(var(--bar-h) + var(--safe-bottom) + 24px); }
+    /* ==================================================================
+       4. Layout & Cards
+    ================================================================== */
+    main {
+      flex: 1; padding: 16px 16px 24px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    body.has-items main { padding-bottom: calc(var(--bar-h) + var(--safe-bottom) + 32px); }
 
     .card {
-      background: var(--surface);
-      border: 1px solid var(--line);
+      background: var(--bg-surface);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
       border-radius: var(--r-md);
-      padding: 16px;
+      box-shadow: var(--shadow-card);
+      padding: 18px;
+      position: relative;
     }
-    .card__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; }
-    .card__title { font-size: 14px; font-weight: 600; color: var(--text); }
-    .caption { font-size: 13px; color: var(--text-2); }
+    .card__head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 12px;
+    }
+    .card__title {
+      font-size: 15px; font-weight: 700; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .caption { font-size: 13px; color: var(--text-muted); }
 
-    /* ------------------------------------------------------------------
-       Buttons
-    ------------------------------------------------------------------ */
+    /* Flash Security Banner */
+    .flash-banner {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 16px; border-radius: var(--r-md);
+      background: linear-gradient(90deg, rgba(255, 87, 34, 0.12) 0%, rgba(6, 182, 212, 0.1) 100%);
+      border: 1px solid rgba(255, 87, 34, 0.25);
+      position: relative; overflow: hidden;
+    }
+    .flash-banner::before {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+      animation: bannerShimmer 3.5s infinite;
+    }
+    @keyframes bannerShimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+    .flash-banner__left { display: flex; align-items: center; gap: 10px; z-index: 1; }
+    .flash-banner__icon {
+      width: 32px; height: 32px; border-radius: 10px;
+      background: var(--primary-gradient); color: #FFF;
+      display: flex; align-items: center; justify-content: center; flex: none;
+    }
+    .flash-banner__text h4 { font-size: 13.5px; font-weight: 700; margin: 0; }
+    .flash-banner__text p { font-size: 11.5px; color: var(--text-muted); margin: 0; }
+    .badge-pill {
+      font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: var(--r-full);
+      background: var(--ok-soft); color: var(--ok); border: 1px solid var(--ok);
+      z-index: 1; white-space: nowrap;
+    }
+
+    /* Buttons */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
       min-height: 48px; padding: 0 20px;
       border-radius: var(--r-md);
       font-size: 15px; font-weight: 600;
-      transition: background-color .15s, opacity .15s, transform .08s;
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative; overflow: hidden;
     }
-    .btn:active { transform: scale(0.98); }
-    .btn:disabled { opacity: .42; pointer-events: none; }
-    .btn--primary { background: var(--accent); color: var(--accent-ink); }
-    .btn--outline { border: 1px solid var(--line-strong); color: var(--text); background: var(--surface); }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; pointer-events: none; }
+    .btn--primary {
+      background: var(--primary-gradient);
+      color: #FFFFFF;
+      box-shadow: 0 4px 18px var(--primary-glow);
+    }
+    .btn--primary:hover { box-shadow: 0 6px 24px var(--primary-glow); }
+    .btn--outline {
+      border: 1px solid var(--line-strong);
+      color: var(--text);
+      background: var(--bg-surface-elevated);
+    }
+    .btn--outline:hover { background: var(--bg-surface-secondary); }
     .btn--block { width: 100%; }
 
     .text-btn {
       display: inline-flex; align-items: center; gap: 6px;
-      min-height: 36px; padding: 0 10px; margin-right: -10px;
+      min-height: 36px; padding: 0 12px;
       border-radius: var(--r-sm);
-      font-size: 14px; font-weight: 600; color: var(--accent);
+      font-size: 13.5px; font-weight: 600; color: var(--primary);
+      background: rgba(255, 87, 34, 0.1);
+      transition: background 0.15s;
     }
-    .text-btn:active { background: var(--accent-soft); }
-    .text-btn .icon { width: 18px; height: 18px; }
+    .text-btn:hover { background: rgba(255, 87, 34, 0.2); }
 
-    /* ------------------------------------------------------------------
-       Empty state
-    ------------------------------------------------------------------ */
-    .empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 56px 24px 24px; }
-    .empty__icon {
-      width: 64px; height: 64px; border-radius: 50%;
+    /* ==================================================================
+       5. Empty Hero State
+    ================================================================== */
+    .empty {
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      padding: 48px 20px 24px;
+    }
+    .empty__hero-box {
+      position: relative; width: 180px; height: 140px; margin-bottom: 28px;
       display: flex; align-items: center; justify-content: center;
-      background: var(--accent-soft); color: var(--accent); margin-bottom: 20px;
     }
-    .empty__icon .icon { width: 28px; height: 28px; }
-    .empty h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
-    .empty p { color: var(--text-2); max-width: 300px; margin-bottom: 28px; }
-    .empty .btn { max-width: 320px; }
-    .empty__note { display: flex; align-items: center; gap: 8px; margin-top: 20px; font-size: 13px; color: var(--text-2); }
-    .empty__note .icon { width: 16px; height: 16px; }
+    .empty__glow {
+      position: absolute; inset: -15px; border-radius: 50%;
+      background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+      filter: blur(25px); animation: pulseAmbient 3s infinite alternate;
+    }
+    .empty__photo {
+      position: relative; width: 160px; height: 120px; border-radius: 18px;
+      overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+      border: 1.5px solid var(--glass-border);
+      animation: squeezeHero 5s infinite cubic-bezier(0.65, 0, 0.35, 1);
+    }
+    .empty__photo svg { width: 100%; height: 100%; }
+    .empty__metrics {
+      position: absolute; bottom: -12px;
+      display: flex; gap: 8px;
+    }
+    .empty__tag {
+      padding: 4px 10px; border-radius: var(--r-full);
+      font-size: 12px; font-weight: 700; font-family: var(--font-en);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .empty__tag--from { background: var(--bg-surface-secondary); color: var(--text-muted); }
+    .empty__tag--to { background: var(--ok); color: #FFF; }
 
-    /* ------------------------------------------------------------------
-       Before / after preview
-    ------------------------------------------------------------------ */
-    .compare {
-      position: relative; height: 248px; overflow: hidden;
-      border-radius: var(--r-sm); background: var(--surface-2);
-      user-select: none; -webkit-user-select: none;
+    @keyframes squeezeHero {
+      0%, 15% { transform: scale(1); }
+      40%, 65% { transform: scale(0.68); }
+      90%, 100% { transform: scale(1); }
     }
-    .compare img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-    .compare__before { position: absolute; inset: 0; clip-path: inset(0 50% 0 0); pointer-events: none; }
+
+    .empty h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .empty p { color: var(--text-muted); max-width: 340px; margin-bottom: 24px; font-size: 14.5px; }
+
+    /* ==================================================================
+       6. Split Compare Stage
+    ================================================================== */
+    .compare {
+      position: relative; height: 260px; overflow: hidden;
+      border-radius: var(--r-md); background: var(--bg-surface-secondary);
+      user-select: none; -webkit-user-select: none;
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+    .compare img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: contain; pointer-events: none;
+      opacity: 0; transition: opacity 0.35s ease;
+    }
+    .compare img.is-in { opacity: 1; }
+    .compare__before {
+      position: absolute; inset: 0; clip-path: inset(0 50% 0 0); pointer-events: none;
+    }
     .compare__divider {
-      position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px;
-      background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.25); pointer-events: none;
+      position: absolute; top: 0; bottom: 0; left: 50%; width: 2.5px; margin-left: -1.25px;
+      background: #FFFFFF; box-shadow: 0 0 12px rgba(255, 87, 34, 0.8), 0 0 4px rgba(0,0,0,0.5);
+      pointer-events: none;
     }
     .compare__handle {
-      position: absolute; top: 50%; left: 50%; width: 36px; height: 36px; margin: -18px 0 0 -18px;
-      border-radius: 50%; background: #fff; color: #1b1f27;
+      position: absolute; top: 50%; left: 50%; width: 38px; height: 38px; margin: -19px 0 0 -19px;
+      border-radius: 50%; background: #FFFFFF; color: #0F172A;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 1px 4px rgba(0,0,0,.35);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      border: 2px solid var(--primary);
     }
     .compare__handle .icon { width: 18px; height: 18px; }
+
     .compare__tag {
-      position: absolute; bottom: 8px; padding: 2px 8px; border-radius: 6px;
-      background: rgba(0,0,0,.62); color: #fff; font-size: 12px; font-weight: 500; pointer-events: none;
+      position: absolute; bottom: 10px; padding: 3px 10px; border-radius: var(--r-full);
+      font-size: 11.5px; font-weight: 700; pointer-events: none;
+      backdrop-filter: blur(8px);
     }
-    .compare__tag--l { left: 8px; }
-    .compare__tag--r { right: 8px; }
+    .compare__tag--l { left: 10px; background: rgba(0, 0, 0, 0.65); color: #FFF; }
+    .compare__tag--r { right: 10px; background: var(--ok); color: #FFF; }
+
+    /* Live Watermark Stamp on Preview */
+    .compare__watermark-badge {
+      position: absolute; z-index: 3; pointer-events: none;
+      padding: 4px 10px; border-radius: 6px;
+      background: rgba(0, 0, 0, 0.55); color: #FFFFFF;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.25);
+      transition: all 0.2s ease;
+    }
+    .compare__watermark-badge.pos-bottom-right { bottom: 38px; right: 10px; }
+    .compare__watermark-badge.pos-bottom-left { bottom: 38px; left: 10px; }
+    .compare__watermark-badge.pos-top-right { top: 10px; right: 10px; }
+    .compare__watermark-badge.pos-center { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
     .compare__range {
       position: absolute; inset: 0; width: 100%; height: 100%; margin: 0;
       opacity: 0; cursor: ew-resize; touch-action: pan-y;
     }
-    .compare:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
     .compare__loader {
-      position: absolute; inset: 0; z-index: 2;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-      background: color-mix(in srgb, var(--bg) 72%, transparent);
-      font-size: 13px; font-weight: 500;
+      position: absolute; inset: 0; z-index: 5;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+      background: rgba(11, 14, 20, 0.75);
+      backdrop-filter: blur(8px);
+      font-size: 13.5px; font-weight: 600; color: #FFF;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
     }
+    .compare__loader.is-on { opacity: 1; }
 
     .spinner {
-      width: 24px; height: 24px; border-radius: 50%;
-      border: 2.5px solid var(--line-strong); border-top-color: var(--accent);
-      animation: spin .8s linear infinite;
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.2); border-top-color: var(--primary);
+      animation: spin 0.8s linear infinite;
     }
-    .spinner--sm { width: 16px; height: 16px; border-width: 2px; }
+    .spinner--sm { width: 18px; height: 18px; border-width: 2px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 14px; }
-    .stat { display: flex; flex-direction: column; gap: 2px; }
-    .stat + .stat { padding-left: 14px; border-left: 1px solid var(--line); }
-    .stat__label { font-size: 12px; color: var(--text-2); }
-    .stat__value { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    /* Comparison Metrics Grid */
+    .stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px;
+    }
+    .stat-card {
+      background: var(--bg-surface-secondary);
+      border: 1px solid var(--line);
+      border-radius: var(--r-sm);
+      padding: 10px 12px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .stat__label { font-size: 11.5px; color: var(--text-muted); font-weight: 500; }
+    .stat__value {
+      font-size: 16.5px; font-weight: 700; font-variant-numeric: tabular-nums;
+      font-family: var(--font-en);
+    }
     .stat__value--ok { color: var(--ok); }
     .stat__value--warn { color: var(--warn); }
 
     .notice {
-      display: flex; gap: 8px; margin-top: 12px; padding: 10px 12px;
+      display: flex; align-items: flex-start; gap: 10px; margin-top: 12px; padding: 12px;
       border-radius: var(--r-sm); font-size: 13px; line-height: 1.45;
-      background: var(--surface-2); color: var(--text-2);
+      background: var(--bg-surface-secondary); color: var(--text-muted);
+      border: 1px solid var(--line);
     }
-    .notice .icon { width: 18px; height: 18px; margin-top: 1px; }
-    .notice--warn { background: var(--warn-soft); color: var(--warn); }
-    .notice--err { background: var(--err-soft); color: var(--err); }
+    .notice .icon { width: 18px; height: 18px; margin-top: 1px; color: var(--accent-cyan); }
+    .notice--warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+    .notice--err { background: var(--err-soft); color: var(--err); border-color: var(--err); }
 
-    /* ------------------------------------------------------------------
-       File list
-    ------------------------------------------------------------------ */
-    .files__summary { margin-top: 2px; }
-    .file-list { margin: 8px -8px -8px; }
-    .file { position: relative; display: flex; align-items: center; border-radius: var(--r-sm); }
-    .file[aria-current="true"] { background: var(--accent-soft); }
-    .file__main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 8px 4px 8px 8px; text-align: left; }
-    .file__thumb { width: 48px; height: 48px; flex: none; border-radius: 8px; overflow: hidden; background: var(--surface-2); }
+    /* ==================================================================
+       7. Files Batch List
+    ================================================================== */
+    .file-list {
+      margin-top: 10px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .file {
+      position: relative; display: flex; align-items: center;
+      background: var(--bg-surface-secondary);
+      border: 1px solid var(--line);
+      border-radius: var(--r-sm);
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      overflow: hidden;
+    }
+    .file[aria-current="true"] {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary), 0 4px 14px var(--primary-glow);
+    }
+    .file__main {
+      flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px;
+      padding: 8px 10px; text-align: left;
+    }
+    .file__thumb {
+      width: 44px; height: 44px; flex: none; border-radius: 8px;
+      overflow: hidden; background: var(--bg-base); border: 1px solid var(--line);
+    }
     .file__thumb img { width: 100%; height: 100%; object-fit: cover; }
     .file__meta { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-    .file__name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .file__sub { font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
-    .file__status { flex: none; min-width: 44px; text-align: right; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; display: flex; justify-content: flex-end; }
+    .file__name {
+      font-size: 13.5px; font-weight: 600; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .file__sub {
+      font-size: 11.5px; color: var(--text-muted); font-variant-numeric: tabular-nums;
+      font-family: var(--font-en);
+    }
+    .file__status {
+      flex: none; min-width: 52px; text-align: right;
+      font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
+      font-family: var(--font-en);
+    }
     .file__status--ok { color: var(--ok); }
     .file__status--warn { color: var(--warn); }
     .file__status--err { color: var(--err); }
-    .file__remove { width: 40px; height: 40px; margin-right: 2px; }
-    .file__remove .icon { width: 18px; height: 18px; }
+    .file__remove { width: 38px; height: 38px; margin-right: 4px; }
 
-    /* ------------------------------------------------------------------
-       Settings controls
-    ------------------------------------------------------------------ */
-    .settings { display: flex; flex-direction: column; gap: 20px; }
+    /* ==================================================================
+       8. Studio Settings Tabs & Sliders
+    ================================================================== */
+    .seg-tabs {
+      position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+      gap: 4px; padding: 4px; border-radius: var(--r-md);
+      background: var(--bg-surface-secondary);
+      border: 1px solid var(--line);
+    }
+    .seg-tabs button {
+      position: relative; z-index: 1; min-height: 40px; padding: 0 8px;
+      border-radius: var(--r-sm); font-size: 13.5px; font-weight: 600;
+      color: var(--text-muted); transition: all 0.2s;
+    }
+    .seg-tabs button[aria-pressed="true"] {
+      color: #FFFFFF; background: var(--primary-gradient);
+      box-shadow: 0 2px 10px var(--primary-glow);
+    }
+
+    .settings-panel { display: flex; flex-direction: column; gap: 18px; margin-top: 16px; }
     .field { display: flex; flex-direction: column; gap: 10px; }
     .field__row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-    .field__label { font-size: 14px; font-weight: 500; }
-    .field__value { font-size: 15px; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
-    .hint { font-size: 13px; color: var(--text-2); }
-
-    .seg { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; padding: 3px; border-radius: 10px; background: var(--surface-2); }
-    .seg::before { content: ""; position: absolute; top: 3px; bottom: 3px; left: 3px; border-radius: 8px; background: var(--seg-selected); box-shadow: 0 1px 2px rgba(0,0,0,.14);
-      width: calc((100% - 6px - (var(--n, 2) - 1) * 2px) / var(--n, 2)); transform: translateX(calc(var(--i, 0) * (100% + 2px)));
-      transition: transform .3s cubic-bezier(.3,.9,.3,1); }
-    .seg button { position: relative; z-index: 1; min-height: 38px; padding: 0 10px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--text-2); transition: color .2s; }
-    .seg button[aria-pressed="true"] { color: var(--text); font-weight: 600; }
+    .field__label { font-size: 14px; font-weight: 600; }
+    .field__value {
+      font-size: 15px; font-weight: 700; color: var(--primary);
+      font-family: var(--font-en);
+    }
 
     .chips { display: flex; flex-wrap: wrap; gap: 8px; }
     .chip {
-      min-height: 36px; padding: 0 14px; border-radius: var(--r-sm);
-      border: 1px solid var(--line-strong); font-size: 14px; color: var(--text);
-      font-variant-numeric: tabular-nums;
+      min-height: 38px; padding: 0 14px; border-radius: var(--r-sm);
+      border: 1px solid var(--line); font-size: 13.5px; font-weight: 600;
+      background: var(--bg-surface-secondary); color: var(--text-muted);
+      transition: all 0.15s;
     }
-    .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+    .chip:hover { border-color: var(--line-strong); color: var(--text); }
+    .chip[aria-pressed="true"] {
+      background: rgba(255, 87, 34, 0.15); border-color: var(--primary);
+      color: var(--primary);
+    }
 
+    /* Range Slider */
     input[type="range"].slider {
       -webkit-appearance: none; appearance: none; width: 100%; height: 32px; margin: 0;
       background: transparent; cursor: pointer;
     }
     input[type="range"].slider::-webkit-slider-runnable-track {
-      height: 4px; border-radius: 2px;
-      background: linear-gradient(to right, var(--accent) var(--fill, 50%), var(--line-strong) var(--fill, 50%));
+      height: 6px; border-radius: 3px;
+      background: linear-gradient(to right, var(--primary) var(--fill, 75%), var(--bg-surface-secondary) var(--fill, 75%));
+      border: 1px solid var(--line);
     }
-    input[type="range"].slider::-moz-range-track { height: 4px; border-radius: 2px; background: var(--line-strong); }
-    input[type="range"].slider::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--accent); }
     input[type="range"].slider::-webkit-slider-thumb {
       -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin-top: -9px;
-      border-radius: 50%; background: var(--accent); border: 3px solid var(--surface);
-      box-shadow: 0 0 0 1px var(--line-strong), 0 1px 3px rgba(0,0,0,.3);
+      border-radius: 50%; background: #FFFFFF; border: 3px solid var(--primary);
+      box-shadow: 0 0 10px var(--primary-glow), 0 2px 6px rgba(0,0,0,0.3);
+      transition: transform 0.15s ease;
     }
-    input[type="range"].slider::-moz-range-thumb {
-      width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 3px solid var(--surface);
-      box-shadow: 0 0 0 1px var(--line-strong);
-    }
+    input[type="range"].slider:active::-webkit-slider-thumb { transform: scale(1.2); }
 
     .input-group { display: flex; gap: 10px; align-items: stretch; }
     .input {
       flex: 1; min-width: 0; min-height: 48px; padding: 0 14px;
-      border: 1px solid var(--line-strong); border-radius: var(--r-md);
-      background: var(--surface); font-size: 16px; font-weight: 600;
+      border: 1px solid var(--line); border-radius: var(--r-md);
+      background: var(--bg-surface-secondary); font-size: 16px; font-weight: 600;
+      color: var(--text);
     }
-    .input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
-    .input-group .seg { width: 132px; flex: none; }
+    .input:focus { outline: 2px solid var(--primary); border-color: var(--primary); }
 
-    /* ------------------------------------------------------------------
-       Bottom action bar
-    ------------------------------------------------------------------ */
+    /* Watermark Toggle Switch */
+    .switch-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; border-radius: var(--r-sm);
+      background: var(--bg-surface-secondary); border: 1px solid var(--line);
+    }
+    .switch-label { font-size: 14px; font-weight: 600; }
+    .toggle-switch {
+      position: relative; width: 48px; height: 26px; border-radius: var(--r-full);
+      background: var(--bg-surface-elevated); border: 1px solid var(--line-strong);
+      cursor: pointer; transition: background 0.2s;
+    }
+    .toggle-switch[aria-checked="true"] { background: var(--primary); border-color: var(--primary); }
+    .toggle-knob {
+      position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+      border-radius: 50%; background: #FFF; transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .toggle-switch[aria-checked="true"] .toggle-knob { transform: translateX(22px); }
+
+    /* ==================================================================
+       9. Bottom Floating Action Bar
+    ================================================================== */
     .actionbar {
-      position: fixed; left: 50%; bottom: 0; z-index: 20;
-      width: 100%; max-width: 560px; transform: translateX(-50%);
+      position: fixed; left: 50%; bottom: 0; z-index: 25;
+      width: 100%; max-width: 580px; transform: translateX(-50%);
       display: flex; gap: 10px;
-      padding: 12px 16px calc(12px + var(--safe-bottom));
-      background: var(--surface); border-top: 1px solid var(--line);
+      padding: 14px 16px calc(14px + var(--safe-bottom));
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--line);
     }
     .actionbar .btn { flex: 1; }
     .actionbar .btn--outline { flex: 0 0 auto; }
 
-    /* ------------------------------------------------------------------
-       Snackbar
-    ------------------------------------------------------------------ */
+    /* Snackbar */
     .snackbar {
-      position: fixed; left: 50%; bottom: calc(24px + var(--safe-bottom)); z-index: 60;
-      width: calc(100% - 32px); max-width: 420px;
-      transform: translate(-50%, 12px); opacity: 0; pointer-events: none;
-      transition: opacity .2s, transform .2s;
+      position: fixed; left: 50%; bottom: calc(24px + var(--safe-bottom)); z-index: 80;
+      width: calc(100% - 32px); max-width: 440px;
+      transform: translate(-50%, 14px); opacity: 0; pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
-    body.has-items .snackbar { bottom: calc(var(--bar-h) + var(--safe-bottom) + 12px); }
+    body.has-items .snackbar { bottom: calc(var(--bar-h) + var(--safe-bottom) + 14px); }
     .snackbar.is-visible { opacity: 1; transform: translate(-50%, 0); }
     .snackbar__msg {
-      padding: 12px 16px; border-radius: var(--r-sm);
-      background: var(--text); color: var(--bg);
-      font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,.22);
+      padding: 12px 18px; border-radius: var(--r-md);
+      background: #0F172A; color: #F8FAFC;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 14px; font-weight: 500;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
     }
 
-    /* ------------------------------------------------------------------
-       Update sheet
-    ------------------------------------------------------------------ */
-    .sheet-scrim { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; background: var(--scrim); }
+    /* Update & Sheet Modal */
+    .sheet-scrim {
+      position: fixed; inset: 0; z-index: 90;
+      display: flex; align-items: flex-end; justify-content: center;
+      background: var(--scrim); backdrop-filter: blur(4px);
+    }
     .sheet {
-      width: 100%; max-width: 560px; max-height: 88dvh; overflow-y: auto;
-      padding: 12px 20px calc(20px + var(--safe-bottom));
-      background: var(--surface); border-radius: var(--r-lg) var(--r-lg) 0 0;
-      animation: sheet-in .26s cubic-bezier(.2,.8,.2,1);
+      width: 100%; max-width: 580px; max-height: 85dvh; overflow-y: auto;
+      padding: 14px 20px calc(24px + var(--safe-bottom));
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
+      animation: sheetIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
-    @keyframes sheet-in { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
-    .sheet__grab { width: 36px; height: 4px; border-radius: 2px; background: var(--line-strong); margin: 0 auto 16px; }
-    .sheet h2 { font-size: 19px; font-weight: 600; }
-    .sheet__ver { margin: 4px 0 16px; font-size: 14px; color: var(--text-2); }
-    .sheet__ver strong { color: var(--text); font-weight: 600; }
-    .changelog { padding: 12px 14px 12px 32px; border-radius: var(--r-sm); background: var(--surface-2); list-style: disc; font-size: 14px; display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; }
-    .sheet__actions { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+    @keyframes sheetIn { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .sheet__grab { width: 40px; height: 5px; border-radius: 3px; background: var(--line-strong); margin: 0 auto 16px; }
+    .sheet h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .changelog {
+      padding: 12px 16px 12px 34px; border-radius: var(--r-sm);
+      background: var(--bg-surface-secondary); list-style: disc; font-size: 14px;
+      display: flex; flex-direction: column; gap: 6px; margin: 16px 0;
+    }
 
-
-    /* ------------------------------------------------------------------
-       Brand + illustration
-    ------------------------------------------------------------------ */
-    .appbar h1.brand { margin: 0; font-size: inherit; font-weight: inherit; letter-spacing: 0; }
-    .brand__btn { display: flex; align-items: center; gap: 10px; min-height: 44px; margin-left: -6px; padding: 0 10px 0 6px; border-radius: var(--r-md); text-align: left; }
-    .brand__btn:active { background: var(--surface-2); }
-    .brand__text { display: flex; flex-direction: column; line-height: 1.2; }
-    .brand__name { font-size: 18px; font-weight: 600; letter-spacing: -0.1px; }
-    .brand__by { font-size: 12px; color: var(--text-2); }
-    .brand__mark { width: 28px; height: 28px; flex: none; }
-
-    .demo { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-bottom: 26px; }
-    .demo__stage { width: 168px; height: 128px; display: flex; align-items: center; justify-content: center; }
-    .demo__photo { width: 168px; height: 126px; border-radius: 14px; overflow: hidden;
-      box-shadow: 0 0 0 1px var(--line), 0 10px 28px rgba(0,0,0,.10);
-      animation: squeeze 4.8s cubic-bezier(.65,0,.35,1) infinite; }
-    .demo__photo svg { width: 100%; height: 100%; display: block; }
-    .demo__sizes { position: relative; width: 140px; height: 30px; font-weight: 600; font-variant-numeric: tabular-nums; }
-    .demo__sizes span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 21px; }
-    .demo__from { animation: demo-from 4.8s infinite; }
-    .demo__to { color: var(--ok); animation: demo-to 4.8s infinite; }
-    @keyframes squeeze { 0%, 12% { transform: scale(1); } 42%, 62% { transform: scale(.6); } 92%, 100% { transform: scale(1); } }
-    @keyframes demo-from { 0%, 24% { opacity: 1; transform: none; } 34%, 70% { opacity: 0; transform: translateY(-8px); } 80%, 100% { opacity: 1; transform: none; } }
-    @keyframes demo-to { 0%, 30% { opacity: 0; transform: translateY(8px); } 40%, 62% { opacity: 1; transform: none; } 72%, 100% { opacity: 0; transform: translateY(8px); } }
-
-    /* ------------------------------------------------------------------
-       Motion
-    ------------------------------------------------------------------ */
-    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes bar-in { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
-    @keyframes row-in { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
-    @keyframes row-out { from { max-height: 72px; } to { opacity: 0; transform: translateX(18px); max-height: 0; } }
-    @keyframes indet { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
-    @keyframes ripple { to { transform: scale(1); opacity: 0; } }
-
-    .empty > * { animation: rise .55s cubic-bezier(.2,.8,.2,1) both; }
-    .empty > :nth-child(2) { animation-delay: .06s; }
-    .empty > :nth-child(3) { animation-delay: .12s; }
-    .empty > :nth-child(4) { animation-delay: .18s; }
-    .empty > :nth-child(5) { animation-delay: .24s; }
-    .empty > :nth-child(6) { animation-delay: .28s; }
-
-    #workspace > .card { animation: rise .5s cubic-bezier(.2,.8,.2,1) both; }
-    #workspace > .card:nth-child(2) { animation-delay: .07s; }
-    #workspace > .card:nth-child(3) { animation-delay: .14s; }
-
-    .actionbar:not([hidden]) { animation: bar-in .4s cubic-bezier(.2,.8,.2,1); }
-    .field:not([hidden]) { animation: fade .28s ease; }
-    .sheet-scrim:not([hidden]) { animation: fade .2s ease; }
-
-    .file { max-height: 72px; transition: background-color .25s; animation: row-in .34s cubic-bezier(.2,.8,.2,1) both; }
-    .file.is-leaving { animation: row-out .22s ease forwards; overflow: hidden; pointer-events: none; }
-    .file__thumb img { opacity: 0; transition: opacity .3s ease; }
-    .file__thumb img.is-in { opacity: 1; }
-
-    .compare img { opacity: 0; transition: opacity .35s ease; }
-    .compare img.is-in { opacity: 1; }
-    .compare__loader { opacity: 0; pointer-events: none; transition: opacity .2s ease; }
-    .compare__loader.is-on { opacity: 1; transition-delay: .15s; }
-    .progress { position: absolute; left: 0; right: 0; top: 0; height: 3px; overflow: hidden; }
-    .progress::before { content: ""; position: absolute; inset: 0; width: 40%; border-radius: 2px; background: var(--accent); animation: indet 1.1s ease-in-out infinite; }
-
-    input[type="range"].slider::-webkit-slider-thumb { transition: transform .15s ease; }
-    input[type="range"].slider:active::-webkit-slider-thumb { transform: scale(1.18); }
-
-    /* Material-style ripple */
+    /* Material Ripple Effect */
     .btn, .chip, .text-btn, .icon-btn, .file__main { position: relative; overflow: hidden; }
-    .ripple { position: absolute; border-radius: 50%; background: currentColor; opacity: .18; transform: scale(0); animation: ripple .55s ease-out forwards; pointer-events: none; }
-
-
-    /* ------------------------------------------------------------------
-       Branding: splash, about, credit
-    ------------------------------------------------------------------ */
-    #splash { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-      padding-bottom: calc(40px + var(--safe-bottom)); background: var(--bg); animation: splash-out .5s ease 1.9s forwards; }
-    @keyframes splash-out { to { opacity: 0; visibility: hidden; } }
-    @keyframes tile-in { from { opacity: 0; transform: scale(.6) rotate(-8deg); } to { opacity: 1; transform: none; } }
-    @keyframes converge { from { opacity: 0; transform: translate(var(--dx), var(--dy)); } to { opacity: 1; transform: none; } }
-    @keyframes pop-core { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: none; } }
-    @keyframes ring { 0% { opacity: .55; transform: scale(.8); } 100% { opacity: 0; transform: scale(1.25); } }
-    @keyframes letter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-    @keyframes load { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-    .splash__center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .splash__logo { position: relative; width: 96px; height: 96px; margin-bottom: 22px; }
-    .splash__ring { position: absolute; inset: -14px; border-radius: 34px; border: 2px solid var(--accent); opacity: 0; animation: ring 1.2s cubic-bezier(.2,.8,.2,1) .9s both; }
-    .splash__mark { width: 100%; height: 100%; animation: tile-in .7s cubic-bezier(.2,1.3,.3,1) both; }
-    .sp { fill: none; stroke: var(--accent-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; animation: converge .8s cubic-bezier(.2,.8,.2,1) .45s both; }
-    .sp-tl { --dx: -4px; --dy: -4px; } .sp-tr { --dx: 4px; --dy: -4px; } .sp-bl { --dx: -4px; --dy: 4px; } .sp-br { --dx: 4px; --dy: 4px; }
-    .sp-core { fill: var(--accent-ink); transform-box: fill-box; transform-origin: center; animation: pop-core .5s cubic-bezier(.2,1.6,.3,1) .85s both; }
-    .splash__name { display: flex; font-size: 26px; font-weight: 600; letter-spacing: -0.2px; }
-    .splash__name span { display: inline-block; animation: letter .5s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(.85s + var(--i, 0) * .035s); }
-    .splash__name .sp-gap { width: .3em; }
-    .splash__tag { margin-top: 8px; font-size: 14px; color: var(--text-2); animation: rise .5s ease 1.4s both; }
-    .splash__foot { width: 100%; }
-    .splash__bar { width: 120px; height: 3px; margin: 0 auto 18px; border-radius: 2px; overflow: hidden; background: var(--line); }
-    .splash__bar span { display: block; height: 100%; background: var(--accent); transform-origin: left; animation: load 1.7s cubic-bezier(.4,0,.2,1) .2s both; }
-    .splash__by { text-align: center; font-size: 13px; color: var(--text-2); animation: rise .5s ease 1.1s both; }
-    .splash__by strong { color: var(--text); font-weight: 600; }
-    .sheet-scrim:not([hidden]) .about__logo { animation: tile-in .6s cubic-bezier(.2,1.3,.3,1) both; }
-
-    /* Header logo "works" while compressing */
-    .hm { fill: none; stroke: var(--accent-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .hm-core { fill: var(--accent-ink); transform-box: fill-box; transform-origin: center; }
-    @keyframes hm-tl { 50% { transform: translate(1.6px, 1.6px); } }
-    @keyframes hm-tr { 50% { transform: translate(-1.6px, 1.6px); } }
-    @keyframes hm-bl { 50% { transform: translate(1.6px, -1.6px); } }
-    @keyframes hm-br { 50% { transform: translate(-1.6px, -1.6px); } }
-    @keyframes hm-core { 50% { transform: scale(.65); } }
-    body.is-busy .hm-tl { animation: hm-tl .9s ease-in-out infinite; }
-    body.is-busy .hm-tr { animation: hm-tr .9s ease-in-out infinite; }
-    body.is-busy .hm-bl { animation: hm-bl .9s ease-in-out infinite; }
-    body.is-busy .hm-br { animation: hm-br .9s ease-in-out infinite; }
-    body.is-busy .hm-core { animation: hm-core .9s ease-in-out infinite; }
-
-    .credit { margin-top: 28px; min-height: 36px; padding: 0 12px; border-radius: var(--r-sm); font-size: 13px; color: var(--text-2); }
-    .credit strong { color: var(--text); font-weight: 600; }
-    .empty > :nth-child(7) { animation-delay: .34s; }
-
-    .sheet { position: relative; }
-    .sheet__close { position: absolute; top: 8px; right: 8px; }
-    .about__hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 8px 0 20px; }
-    .about__logo { width: 72px; height: 72px; margin-bottom: 14px; }
-    .about__hero h2 { font-size: 20px; }
-    .about__ver { margin: 2px 0 10px; font-size: 13px; color: var(--text-2); }
-    .about__desc { max-width: 300px; font-size: 14px; color: var(--text-2); }
-    .dev { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--bg); }
-    .dev__avatar { width: 44px; height: 44px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--accent-soft); color: var(--accent); font-weight: 600; font-size: 15px; letter-spacing: .5px; }
-    .dev__meta { display: flex; flex-direction: column; line-height: 1.3; }
-    .dev__label { font-size: 12px; color: var(--text-2); }
-    .dev__name { font-size: 16px; font-weight: 600; }
-    .about__legal { margin-top: 16px; text-align: center; font-size: 12px; color: var(--text-2); }
+    .ripple {
+      position: absolute; border-radius: 50%; background: currentColor;
+      opacity: 0.2; transform: scale(0); animation: rippleEffect 0.5s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes rippleEffect { to { transform: scale(1); opacity: 0; } }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Icon sprite -->
+  <!-- Hidden SVG Icons Sprite -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <symbol id="logo" viewBox="0 0 28 28">
-      <rect width="28" height="28" rx="8" fill="var(--accent)"/>
-      <path d="M8.5 12V8.5H12M19.5 12V8.5H16M8.5 16v3.5H12M19.5 16v3.5H16" stroke="var(--accent-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <rect x="12" y="12" width="4" height="4" rx="1" fill="var(--accent-ink)"/>
-    </symbol>
-    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-5 4 4 2.5-2.5L20 17"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8.5" cy="9.5" r="1.8"/><path d="M4 17l6-6 4 4 3-3 3 5"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M10 11v6M14 11v6M6.5 7l.8 12h9.4l.8-12M9 7V4.5h6V7"/></symbol>
-    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 11-2.2-5.3M19.5 4.5v4.2h-4.2"/></symbol>
-    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></symbol>
-    <symbol id="i-zip" viewBox="0 0 24 24"><path d="M4 8h16v11.5H4zM3 4.5h18V8H3zM10 12.5h4"/></symbol>
-    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
-    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="11" width="13" height="9" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 017 0v3"/></symbol>
-    <symbol id="i-arrows" viewBox="0 0 24 24"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/></symbol>
-    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8v.01"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l.8 13h10.4l.8-13M9 7V4h6V7"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 11-2.4-5.6M20 4v6h-6"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 20h16"/></symbol>
+    <symbol id="i-zip" viewBox="0 0 24 24"><path d="M4 8h16v12H4zM3 4h18v4H3zM10 12h4"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6l-12 12"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></symbol>
+    <symbol id="i-arrows" viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></symbol>
+    <symbol id="i-stamp" viewBox="0 0 24 24"><path d="M5 21h14M7 17h10M12 13a4 4 0 004-4V5H8v4a4 4 0 004 4z"/></symbol>
   </svg>
-
-  <!-- Launch splash: animated branding, pure CSS, tap to skip -->
-  <div id="splash" aria-hidden="true">
-    <div class="splash__center">
-      <div class="splash__logo">
-        <span class="splash__ring"></span>
-        <svg class="splash__mark" viewBox="0 0 28 28">
-          <rect width="28" height="28" rx="8" fill="var(--accent)"/>
-          <path class="sp sp-tl" d="M8.5 12V8.5H12"/>
-          <path class="sp sp-tr" d="M19.5 12V8.5H16"/>
-          <path class="sp sp-bl" d="M8.5 16v3.5H12"/>
-          <path class="sp sp-br" d="M19.5 16v3.5H16"/>
-          <rect class="sp-core" x="12" y="12" width="4" height="4" rx="1"/>
-        </svg>
-      </div>
-      <div class="splash__name"><span style="--i:0">P</span><span style="--i:1">h</span><span style="--i:2">o</span><span style="--i:3">t</span><span style="--i:4">o</span><span class="sp-gap"></span><span style="--i:6">C</span><span style="--i:7">o</span><span style="--i:8">m</span><span style="--i:9">p</span><span style="--i:10">r</span><span style="--i:11">e</span><span style="--i:12">s</span><span style="--i:13">s</span><span style="--i:14">o</span><span style="--i:15">r</span></div>
-      <div class="splash__tag">ছোট ফাইল, একই কোয়ালিটি</div>
-    </div>
-    <div class="splash__foot">
-      <div class="splash__bar"><span></span></div>
-      <div class="splash__by">by <strong>Chandan Das</strong></div>
-    </div>
-  </div>
 
   <div class="app">
 
+    <!-- Flashing Splash Screen / Intro Logo & Watermark Screen -->
+    <div id="splashScreen" class="splash-screen" title="ট্যাপ করে অ্যাপে প্রবেশ করুন">
+      <div class="splash-ambient"></div>
+      <div class="splash-flash-beam"></div>
+      <div class="splash-card">
+        <div class="splash-logo-box">
+          <div class="splash-logo-rings"></div>
+          <div class="splash-logo-inner">
+            <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M8.5 12V8.5H12M19.5 12V8.5H16M8.5 16v3.5H12M19.5 16v3.5H16"/>
+              <rect x="11.5" y="11.5" width="5" height="5" rx="1.5" fill="currentColor"/>
+            </svg>
+          </div>
+        </div>
+        <h1 class="splash-title">Photo Compressor Pro</h1>
+        <div class="splash-sub">STUDIO EDITION • বাংলা</div>
+        <div class="splash-chips">
+          <span class="splash-chip">⚡ আল্ট্রা-ফাস্ট কম্প্রেশন</span>
+          <span class="splash-chip">🔒 ১০০% অফলাইন ও প্রাইভেট</span>
+          <span class="splash-chip">🏷️ ওয়াটারমার্ক স্টুডিও</span>
+        </div>
+        <div class="splash-loader-bar"></div>
+        <p class="splash-tap-hint">ট্যাপ করে প্রবেশ করুন</p>
+      </div>
+    </div>
+
+    <!-- Sticky Navigation App Bar -->
     <header class="appbar">
-      <h1 class="brand">
-        <button id="btnBrand" class="brand__btn" type="button" aria-label="Photo Compressor by Chandan Das, অ্যাপ সম্পর্কে">
-          <svg class="brand__mark" viewBox="0 0 28 28" aria-hidden="true">
-            <rect width="28" height="28" rx="8" fill="var(--accent)"/>
-            <g class="hm hm-tl"><path d="M8.5 12V8.5H12"/></g>
-            <g class="hm hm-tr"><path d="M19.5 12V8.5H16"/></g>
-            <g class="hm hm-bl"><path d="M8.5 16v3.5H12"/></g>
-            <g class="hm hm-br"><path d="M19.5 16v3.5H16"/></g>
-            <rect class="hm-core" x="12" y="12" width="4" height="4" rx="1"/>
+      <div class="brand" id="btnReplaySplash" title="স্প্ল্যাশ স্ক্রিন দেখুন">
+        <div class="brand__logo">
+          <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M8.5 12V8.5H12M19.5 12V8.5H16M8.5 16v3.5H12M19.5 16v3.5H16"/>
+            <rect x="11.5" y="11.5" width="5" height="5" rx="1.5" fill="currentColor"/>
           </svg>
-          <span class="brand__text">
-            <span class="brand__name">Photo Compressor</span>
-            <span class="brand__by">by Chandan Das</span>
-          </span>
-        </button>
-      </h1>
+        </div>
+        <div class="brand__info">
+          <span class="brand__title">ফটো কম্প্রেসার</span>
+          <span class="brand__sub">STUDIO PRO</span>
+        </div>
+      </div>
       <div class="appbar__actions">
-        <button id="btnClearAll" class="icon-btn" type="button" aria-label="সব ছবি মুছুন" hidden>
+        <button id="btnToggleTheme" class="icon-btn" type="button" aria-label="থিম পরিবর্তন করুন" title="ডার্ক/লাইট থিম">
+          <svg class="icon"><use href="#i-sun"/></svg>
+        </button>
+        <button id="btnClearAll" class="icon-btn" type="button" aria-label="সব ছবি মুছুন" title="সব ছবি মুছুন" hidden>
           <svg class="icon"><use href="#i-trash"/></svg>
         </button>
-        <button id="btnCheckUpdate" class="icon-btn" type="button" aria-label="আপডেট চেক করুন">
+        <button id="btnCheckUpdate" class="icon-btn" type="button" aria-label="আপডেট চেক করুন" title="আপডেট">
           <svg class="icon"><use href="#i-refresh"/></svg>
           <span id="updateDot" class="icon-btn__dot" hidden></span>
         </button>
@@ -598,125 +776,212 @@
     <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden />
 
     <main>
-      <!-- Empty state -->
-      <section id="emptyState" class="empty">
-        <div class="demo" aria-hidden="true">
-          <div class="demo__stage">
-            <div class="demo__photo">
-              <svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice">
-                <rect width="120" height="90" fill="var(--demo-sky)"/>
-                <circle cx="88" cy="26" r="9" fill="var(--demo-sun)"/>
-                <path d="M0 90V62l28-26 24 22 18-14 50 36v10z" fill="var(--demo-hill)"/>
-                <path d="M0 90V74l34-18 30 20 20-10 36 24z" fill="var(--demo-hill-2)"/>
-              </svg>
-            </div>
+      <!-- Security / Brand Flash Banner -->
+      <section class="flash-banner" aria-label="প্রাইভেসি নিশ্চয়তা">
+        <div class="flash-banner__left">
+          <div class="flash-banner__icon">
+            <svg class="icon"><use href="#i-lock"/></svg>
           </div>
-          <div class="demo__sizes"><span class="demo__from">4.2 MB</span><span class="demo__to">620 KB</span></div>
+          <div class="flash-banner__text">
+            <h4>১০০% সুরক্ষিত ও অফলাইন প্রসেসিং</h4>
+            <p>ছবি সার্ভারে আপলোড হয় না, ব্রাউজারেই কম্প্রেশন সম্পন্ন হয়।</p>
+          </div>
         </div>
-        <h2>ছবি কম্প্রেস করুন</h2>
-        <p>এক বা একাধিক ছবি বেছে নিন। কোয়ালিটি ঠিক রেখে ফাইল সাইজ কমিয়ে নিন।</p>
-        <button id="btnSelectFiles" class="btn btn--primary btn--block" type="button">
-          <svg class="icon"><use href="#i-plus"/></svg>গ্যালারি থেকে নির্বাচন করুন
-        </button>
-        <div class="empty__note">
-          <svg class="icon"><use href="#i-lock"/></svg>
-          <span>ছবি আপনার ডিভাইসেই প্রসেস হয়, কোথাও আপলোড হয় না</span>
-        </div>
-        <p class="caption" style="margin:12px 0 0">JPG · PNG · WebP</p>
-        <button id="btnCredit" class="credit" type="button">Developed by <strong>Chandan Das</strong></button>
+        <span class="badge-pill">PRO ACTIVE</span>
       </section>
 
-      <!-- Workspace -->
+      <!-- Empty State -->
+      <section id="emptyState" class="empty">
+        <div class="empty__hero-box">
+          <div class="empty__glow"></div>
+          <div class="empty__photo">
+            <svg viewBox="0 0 160 120" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient id="demoSky" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#FF8A50"/>
+                  <stop offset="100%" stop-color="#37474F"/>
+                </linearGradient>
+              </defs>
+              <rect width="160" height="120" fill="url(#demoSky)"/>
+              <circle cx="120" cy="35" r="14" fill="#FFE082"/>
+              <path d="M0 120V78l38-32 32 28 24-18 66 46v18z" fill="#2E3C43"/>
+              <path d="M0 120V95l44-24 40 26 26-14 50 32z" fill="#1E282E"/>
+            </svg>
+          </div>
+          <div class="empty__metrics">
+            <span class="empty__tag empty__tag--from">৪.২ MB</span>
+            <span class="empty__tag empty__tag--to">৬২০ KB (-৮৫%)</span>
+          </div>
+        </div>
+
+        <h2>প্রফেশনাল ফটো কম্প্রেশন</h2>
+        <p>এক বা একাধিক ছবি নির্বাচন করুন। ছবির সর্বোচ্চ কোয়ালিটি বজায় রেখে নিমিষেই সাইজ কমিয়ে নিন।</p>
+        
+        <button id="btnSelectFiles" class="btn btn--primary btn--block" type="button">
+          <svg class="icon"><use href="#i-plus"/></svg>ছবি নির্বাচন করুন (গ্যালারি)
+        </button>
+        <p class="caption" style="margin-top:14px;">সমর্থিত ফরম্যাট: JPG • PNG • WebP</p>
+      </section>
+
+      <!-- Active Workspace -->
       <div id="workspace" hidden style="display:contents">
 
-        <!-- Preview -->
-        <section class="card" aria-label="প্রিভিউ">
+        <!-- Visual Comparison Stage -->
+        <section class="card" aria-label="প্রিভিউ ও তুলনা">
           <div class="compare" id="compareStage">
             <img id="imgAfter" alt="কম্প্রেস করা ছবি" />
             <div class="compare__before" id="beforeClip">
               <img id="imgBefore" alt="আসল ছবি" />
             </div>
+
             <span class="compare__tag compare__tag--l">আসল</span>
             <span class="compare__tag compare__tag--r">কম্প্রেসড</span>
-            <div class="compare__divider" id="compareDivider">
-              <div class="compare__handle"><svg class="icon"><use href="#i-arrows"/></svg></div>
+
+            <!-- Live Watermark Preview Badge -->
+            <div id="watermarkPreviewBadge" class="compare__watermark-badge pos-bottom-right" hidden>
+              <span id="watermarkPreviewText">© Studio Pro</span>
             </div>
-            <input id="compareRange" class="compare__range" type="range" min="0" max="100" value="50" aria-label="আসল ও কম্প্রেস করা ছবির তুলনা" />
+
+            <div class="compare__divider" id="compareDivider">
+              <div class="compare__handle">
+                <svg class="icon"><use href="#i-arrows"/></svg>
+              </div>
+            </div>
+            <input id="compareRange" class="compare__range" type="range" min="0" max="100" value="50" aria-label="আসল ও নতুন ছবির তুলনা" />
+
             <div id="previewLoader" class="compare__loader">
-              <div class="progress"></div><div class="spinner"></div><span>কম্প্রেস হচ্ছে…</span>
+              <div class="spinner"></div>
+              <span>অপটিমাইজ করা হচ্ছে…</span>
             </div>
           </div>
 
+          <!-- Dynamic Statistics Grid -->
           <div class="stats">
-            <div class="stat"><span class="stat__label">আসল</span><span id="statOrig" class="stat__value">–</span></div>
-            <div class="stat"><span class="stat__label">নতুন</span><span id="statNew" class="stat__value">–</span></div>
-            <div class="stat"><span class="stat__label">পরিবর্তন</span><span id="statSaved" class="stat__value">–</span></div>
+            <div class="stat-card">
+              <span class="stat__label">আসল সাইজ</span>
+              <span id="statOrig" class="stat__value">–</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat__label">নতুন সাইজ</span>
+              <span id="statNew" class="stat__value stat__value--ok">–</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat__label">সাইজ সেভ</span>
+              <span id="statSaved" class="stat__value stat__value--ok">–</span>
+            </div>
           </div>
 
           <div id="previewNote" class="notice" hidden>
-            <svg class="icon"><use href="#i-info"/></svg><span id="previewNoteText"></span>
+            <svg class="icon"><use href="#i-info"/></svg>
+            <span id="previewNoteText"></span>
           </div>
         </section>
 
-        <!-- Files -->
+        <!-- Selected Files Batch Queue -->
         <section class="card" aria-label="ছবির তালিকা">
           <div class="card__head">
-            <h2 class="card__title">ছবিসমূহ <span id="fileCount" class="caption">(0)</span></h2>
+            <h2 class="card__title">
+              <svg class="icon"><use href="#i-image"/></svg>
+              ছবির তালিকা <span id="fileCount" class="caption">(০)</span>
+            </h2>
             <button id="btnAddMore" class="text-btn" type="button">
-              <svg class="icon"><use href="#i-plus"/></svg>যোগ করুন
+              <svg class="icon"><use href="#i-plus"/></svg>আরও যোগ করুন
             </button>
           </div>
-          <p id="filesSummary" class="caption files__summary" hidden></p>
+          <p id="filesSummary" class="caption" style="margin-bottom:8px;" hidden></p>
           <ul id="fileList" class="file-list"></ul>
         </section>
 
-        <!-- Settings -->
-        <section class="card settings" aria-label="কম্প্রেশন সেটিংস">
-          <div class="seg" role="group" aria-label="কম্প্রেশন পদ্ধতি">
+        <!-- Studio Compression Controls & Watermark Tool -->
+        <section class="card" aria-label="কম্প্রেশন সেটিংস">
+          <div class="seg-tabs" role="group" aria-label="কম্প্রেশন মোড">
             <button id="tabQuality" type="button" aria-pressed="true">কোয়ালিটি</button>
             <button id="tabTarget" type="button" aria-pressed="false">টার্গেট সাইজ</button>
+            <button id="tabWatermark" type="button" aria-pressed="false">ওয়াটারমার্ক</button>
           </div>
 
-          <div id="panelQuality" class="field">
-            <div class="field__row">
-              <label class="field__label" for="qualitySlider">কোয়ালিটি</label>
-              <span id="qualityLabel" class="field__value">75%</span>
-            </div>
-            <input id="qualitySlider" class="slider" type="range" min="5" max="100" step="1" value="75" />
-            <div class="chips" id="qualityChips">
-              <button class="chip" type="button" data-q="25" aria-pressed="false">25%</button>
-              <button class="chip" type="button" data-q="50" aria-pressed="false">50%</button>
-              <button class="chip" type="button" data-q="75" aria-pressed="true">75%</button>
-              <button class="chip" type="button" data-q="90" aria-pressed="false">90%</button>
-            </div>
-            <p class="hint">কম মান মানে ছোট ফাইল, তবে ডিটেইল কিছুটা কমে।</p>
-            <div id="pngHint" class="notice" hidden>
-              <svg class="icon"><use href="#i-info"/></svg>
-              <span>PNG লসলেস ফরম্যাট, তাই কোয়ালিটি কমালে সাইজ কমবে না। সাইজ কমাতে JPG বা WebP বেছে নিন।</span>
-            </div>
-          </div>
-
-          <div id="panelTarget" class="field" hidden>
-            <label class="field__label" for="targetInput">সর্বোচ্চ ফাইল সাইজ</label>
-            <div class="input-group">
-              <input id="targetInput" class="input" type="number" inputmode="decimal" min="10" step="any" value="200" placeholder="যেমন: 200" />
-              <div class="seg" role="group" aria-label="একক">
-                <button id="unitKB" type="button" aria-pressed="true">KB</button>
-                <button id="unitMB" type="button" aria-pressed="false">MB</button>
+          <!-- Tab 1: Quality Slider -->
+          <div id="panelQuality" class="settings-panel">
+            <div class="field">
+              <div class="field__row">
+                <label class="field__label" for="qualitySlider">কম্প্রেশন মান (Quality)</label>
+                <span id="qualityLabel" class="field__value">75%</span>
+              </div>
+              <input id="qualitySlider" class="slider" type="range" min="5" max="100" step="1" value="75" />
+              <div class="chips" id="qualityChips">
+                <button class="chip" type="button" data-q="25" aria-pressed="false">25% চরম</button>
+                <button class="chip" type="button" data-q="50" aria-pressed="false">50% মিডিয়াম</button>
+                <button class="chip" type="button" data-q="75" aria-pressed="true">75% ব্যালেন্সড</button>
+                <button class="chip" type="button" data-q="90" aria-pressed="false">90% হাই কোয়ালিটি</button>
               </div>
             </div>
-            <div class="chips" id="sizeChips">
-              <button class="chip" type="button" data-size="100" data-unit="KB" aria-pressed="false">100 KB</button>
-              <button class="chip" type="button" data-size="200" data-unit="KB" aria-pressed="true">200 KB</button>
-              <button class="chip" type="button" data-size="500" data-unit="KB" aria-pressed="false">500 KB</button>
-              <button class="chip" type="button" data-size="1" data-unit="MB" aria-pressed="false">1 MB</button>
+            <div id="pngHint" class="notice" hidden>
+              <svg class="icon"><use href="#i-info"/></svg>
+              <span>PNG লসলেস ফরম্যাট। সাইজ বহুলাংশে কমাতে নিচের ফরম্যাট থেকে WebP অথবা JPG বেছে নিন।</span>
             </div>
-            <p class="hint">প্রয়োজনে কোয়ালিটির পাশাপাশি ছবির রেজোলিউশনও কমানো হবে।</p>
           </div>
 
-          <div class="field">
-            <span class="field__label" id="formatLabel">আউটপুট ফরম্যাট</span>
-            <div class="seg" id="formatSeg" role="group" aria-labelledby="formatLabel">
+          <!-- Tab 2: Target Size -->
+          <div id="panelTarget" class="settings-panel" hidden>
+            <div class="field">
+              <label class="field__label" for="targetInput">টার্গেট ফাইল সাইজ (সর্বোচ্চ)</label>
+              <div class="input-group">
+                <input id="targetInput" class="input" type="number" inputmode="decimal" min="10" step="any" value="200" placeholder="200" />
+                <div class="seg-tabs" style="width:130px;flex:none;">
+                  <button id="unitKB" type="button" aria-pressed="true">KB</button>
+                  <button id="unitMB" type="button" aria-pressed="false">MB</button>
+                </div>
+              </div>
+              <div class="chips" id="sizeChips">
+                <button class="chip" type="button" data-size="50" data-unit="KB" aria-pressed="false">50 KB</button>
+                <button class="chip" type="button" data-size="100" data-unit="KB" aria-pressed="false">100 KB</button>
+                <button class="chip" type="button" data-size="200" data-unit="KB" aria-pressed="true">200 KB</button>
+                <button class="chip" type="button" data-size="500" data-unit="KB" aria-pressed="false">500 KB</button>
+                <button class="chip" type="button" data-size="1" data-unit="MB" aria-pressed="false">1 MB</button>
+              </div>
+              <p class="caption">স্মার্ট অ্যালগরিদম টার্গেট সাইজ অর্জনে স্বয়ংক্রিয়ভাবে রেজোলিউশন ও কোয়ালিটি সমন্বয় করবে।</p>
+            </div>
+          </div>
+
+          <!-- Tab 3: Watermark Tool -->
+          <div id="panelWatermark" class="settings-panel" hidden>
+            <div class="switch-row">
+              <span class="switch-label">ওয়াটারমার্ক স্ট্যাম্প সক্রিয় করুন</span>
+              <div id="switchWatermark" class="toggle-switch" role="switch" aria-checked="false" tabindex="0">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+
+            <div id="watermarkControls" style="display:none; flex-direction:column; gap:14px;">
+              <div class="field">
+                <label class="field__label" for="inputWatermarkText">ওয়াটারমার্ক টেক্সট / নাম</label>
+                <input id="inputWatermarkText" class="input" type="text" value="PhotoCompress Pro" placeholder="যেমন: © MyStudio" />
+              </div>
+
+              <div class="field">
+                <span class="field__label">পজিশন (Position)</span>
+                <div class="chips" id="watermarkPosChips">
+                  <button class="chip" type="button" data-pos="bottom-right" aria-pressed="true">ডানে নিচে</button>
+                  <button class="chip" type="button" data-pos="bottom-left" aria-pressed="false">বামে নিচে</button>
+                  <button class="chip" type="button" data-pos="center" aria-pressed="false">মাঝখানে</button>
+                  <button class="chip" type="button" data-pos="top-right" aria-pressed="false">ডানে উপরে</button>
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="field__row">
+                  <label class="field__label" for="watermarkOpacitySlider">স্বচ্ছতা (Opacity)</label>
+                  <span id="watermarkOpacityLabel" class="field__value">60%</span>
+                </div>
+                <input id="watermarkOpacitySlider" class="slider" type="range" min="15" max="100" value="60" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Format Selector Section -->
+          <div class="field" style="margin-top:16px; border-top:1px solid var(--line); padding-top:14px;">
+            <span class="field__label">আউটপুট ফরম্যাট (Format)</span>
+            <div class="seg-tabs" id="formatSeg" role="group">
               <button type="button" data-format="original" aria-pressed="true">Original</button>
               <button type="button" data-format="image/jpeg" aria-pressed="false">JPG</button>
               <button type="button" data-format="image/png" aria-pressed="false">PNG</button>
@@ -724,61 +989,41 @@
             </div>
           </div>
         </section>
+
       </div>
     </main>
 
-    <!-- Action bar -->
+    <!-- Fixed Bottom Action Bar -->
     <footer id="actionBar" class="actionbar" hidden>
-      <button id="btnSaveOne" class="btn btn--primary" type="button">
-        <svg class="icon"><use href="#i-download"/></svg><span id="btnSaveOneText">ছবি সেভ করুন</span>
+      <button id="btnSaveOne" class="btn btn--outline" type="button">
+        <svg class="icon"><use href="#i-download"/></svg>
+        <span id="btnSaveOneText">এই ছবি সেভ</span>
       </button>
       <button id="btnSaveZip" class="btn btn--primary" type="button" hidden>
-        <svg class="icon"><use href="#i-zip"/></svg><span id="btnSaveZipText">সব সেভ (ZIP)</span>
+        <svg class="icon"><use href="#i-zip"/></svg>
+        <span id="btnSaveZipText">সব সেভ (ZIP)</span>
       </button>
     </footer>
 
-    <!-- Snackbar -->
+    <!-- Snackbar / Toast Notification -->
     <div id="snackbar" class="snackbar" role="status" aria-live="polite">
       <div id="snackbarMsg" class="snackbar__msg"></div>
     </div>
 
-    <!-- Update sheet -->
+    <!-- In-App Update Modal -->
     <div id="updateModal" class="sheet-scrim" hidden>
       <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="updTitle">
         <div class="sheet__grab"></div>
-        <h2 id="updTitle">নতুন আপডেট পাওয়া গেছে</h2>
-        <p class="sheet__ver">বর্তমান <span id="updCurrentVer"></span> → নতুন <strong id="updNewVer"></strong></p>
+        <h2 id="updTitle">নতুন আপডেট উপলব্ধ রয়েছে</h2>
+        <p class="caption">বর্তমান <span id="updCurrentVer"></span> → সর্বশেষ <strong id="updNewVer" style="color:var(--primary)"></strong></p>
         <ul id="updChangelog" class="changelog"></ul>
-        <div class="sheet__actions">
-          <button id="btnUpdateNow" class="btn btn--primary btn--block" type="button">আপডেট করুন</button>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <button id="btnUpdateNow" class="btn btn--primary btn--block" type="button">এখনই আপডেট করুন</button>
           <button id="btnUpdateLater" class="btn btn--outline btn--block" type="button">পরে করবো</button>
         </div>
       </div>
     </div>
 
-  </div>
-
-  <!-- About sheet -->
-  <div id="aboutModal" class="sheet-scrim" hidden>
-    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
-      <div class="sheet__grab"></div>
-      <button id="btnAboutClose" class="icon-btn sheet__close" type="button" aria-label="বন্ধ করুন"><svg class="icon"><use href="#i-close"/></svg></button>
-      <div class="about__hero">
-        <svg class="about__logo" aria-hidden="true"><use href="#logo"/></svg>
-        <h2 id="aboutTitle">Photo Compressor</h2>
-        <p class="about__ver">ভার্সন <span id="aboutVer"></span></p>
-        <p class="about__desc">কোয়ালিটি ঠিক রেখে ছবির সাইজ কমান। সবকিছু আপনার ডিভাইসেই প্রসেস হয়, কোথাও আপলোড হয় না।</p>
-      </div>
-      <div class="dev">
-        <div class="dev__avatar" aria-hidden="true">CD</div>
-        <div class="dev__meta"><span class="dev__label">ডেভেলপার</span><span class="dev__name">Chandan Das</span></div>
-      </div>
-      <div class="sheet__actions">
-        <button id="btnFacebook" class="btn btn--primary btn--block" type="button" hidden>Facebook-এ যোগাযোগ করুন</button>
-        <button id="btnAboutUpdate" class="btn btn--outline btn--block" type="button">আপডেট চেক করুন</button>
-      </div>
-      <p id="aboutLegal" class="about__legal"></p>
-    </div>
   </div>
 
   <script>
@@ -789,12 +1034,8 @@
        1. Config
     ================================================================== */
     const APP_CONFIG = {
-      CURRENT_VERSION_NAME: '1.0.0',
-      CURRENT_VERSION_CODE: 1,
-      DEVELOPER_NAME: 'Chandan Das',
-      // Put your Facebook profile link here (must start with https://). Leave empty to hide the button.
-      FACEBOOK_URL: '',
-      // Put your GitHub raw version.json URL here
+      CURRENT_VERSION_NAME: '2.0.0',
+      CURRENT_VERSION_CODE: 2,
       VERSION_JSON_URL: 'https://raw.githubusercontent.com/YOUR_USERNAME/pro-photo-compressor-studio/main/version.json',
       UPDATE_FETCH_TIMEOUT_MS: 8000,
     };
@@ -804,45 +1045,68 @@
        2. State
     ================================================================== */
     const state = {
-      items: [],          // {id,file,originalUrl,thumbUrl,result,resultUrl,status,note,error,job}
+      items: [],
       activeId: null,
-      mode: 'quality',    // 'quality' | 'target'
+      mode: 'quality', // 'quality' | 'target' | 'watermark'
       quality: 75,
       targetValue: '200',
       targetUnit: 'KB',
       format: 'original',
+      watermark: {
+        enabled: false,
+        text: 'PhotoCompress Pro',
+        pos: 'bottom-right',
+        opacity: 0.6,
+      },
+      theme: localStorage.getItem('pc_theme') || 'dark',
       remoteUpdate: null,
     };
 
     const $ = (id) => document.getElementById(id);
     const els = {
+      splashScreen: $('splashScreen'), btnReplaySplash: $('btnReplaySplash'),
+      btnToggleTheme: $('btnToggleTheme'),
       emptyState: $('emptyState'), workspace: $('workspace'), actionBar: $('actionBar'),
       fileInput: $('fileInput'), btnSelectFiles: $('btnSelectFiles'), btnAddMore: $('btnAddMore'),
       btnClearAll: $('btnClearAll'), btnCheckUpdate: $('btnCheckUpdate'), updateDot: $('updateDot'),
       compareStage: $('compareStage'), compareRange: $('compareRange'),
       beforeClip: $('beforeClip'), compareDivider: $('compareDivider'),
       imgBefore: $('imgBefore'), imgAfter: $('imgAfter'), previewLoader: $('previewLoader'),
+      watermarkPreviewBadge: $('watermarkPreviewBadge'), watermarkPreviewText: $('watermarkPreviewText'),
       statOrig: $('statOrig'), statNew: $('statNew'), statSaved: $('statSaved'),
       previewNote: $('previewNote'), previewNoteText: $('previewNoteText'),
       fileCount: $('fileCount'), filesSummary: $('filesSummary'), fileList: $('fileList'),
-      tabQuality: $('tabQuality'), tabTarget: $('tabTarget'),
-      panelQuality: $('panelQuality'), panelTarget: $('panelTarget'),
+      tabQuality: $('tabQuality'), tabTarget: $('tabTarget'), tabWatermark: $('tabWatermark'),
+      panelQuality: $('panelQuality'), panelTarget: $('panelTarget'), panelWatermark: $('panelWatermark'),
       qualitySlider: $('qualitySlider'), qualityLabel: $('qualityLabel'), qualityChips: $('qualityChips'),
       pngHint: $('pngHint'),
       targetInput: $('targetInput'), unitKB: $('unitKB'), unitMB: $('unitMB'), sizeChips: $('sizeChips'),
+      switchWatermark: $('switchWatermark'), watermarkControls: $('watermarkControls'),
+      inputWatermarkText: $('inputWatermarkText'), watermarkPosChips: $('watermarkPosChips'),
+      watermarkOpacitySlider: $('watermarkOpacitySlider'), watermarkOpacityLabel: $('watermarkOpacityLabel'),
       formatSeg: $('formatSeg'),
       btnSaveOne: $('btnSaveOne'), btnSaveOneText: $('btnSaveOneText'),
       btnSaveZip: $('btnSaveZip'), btnSaveZipText: $('btnSaveZipText'),
       snackbar: $('snackbar'), snackbarMsg: $('snackbarMsg'),
-      btnBrand: $('btnBrand'), btnCredit: $('btnCredit'),
-      aboutModal: $('aboutModal'), aboutVer: $('aboutVer'), aboutLegal: $('aboutLegal'),
-      btnFacebook: $('btnFacebook'), btnAboutUpdate: $('btnAboutUpdate'), btnAboutClose: $('btnAboutClose'),
       updateModal: $('updateModal'), updCurrentVer: $('updCurrentVer'), updNewVer: $('updNewVer'),
       updChangelog: $('updChangelog'), btnUpdateNow: $('btnUpdateNow'), btnUpdateLater: $('btnUpdateLater'),
     };
 
     /* ==================================================================
-       3. Utilities
+       3. Theme Management
+    ================================================================== */
+    function applyTheme(theme) {
+      state.theme = theme;
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('pc_theme', theme);
+      initNativeUI();
+    }
+    function toggleTheme() {
+      applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+    }
+
+    /* ==================================================================
+       4. Utilities
     ================================================================== */
     let toastTimer = null;
     function showToast(msg, ms = 2800) {
@@ -867,28 +1131,26 @@
 
     const savedPercent = (orig, now) => (orig > 0 ? Math.round((1 - now / orig) * 100) : 0);
 
-    function setSrc(img, url) {
-      if (url && img.getAttribute('src') !== url) img.src = url;
-    }
-
     const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Preview images fade in once decoded. The old picture stays visible until the new one is ready.
     function setCompareSrc(img, url, owner) {
       if (!url) return;
-      if (img.dataset.owner !== owner) { img.classList.remove('is-in'); img.dataset.owner = owner; img.removeAttribute('src'); }
+      if (img.dataset.owner !== owner) {
+        img.classList.remove('is-in');
+        img.dataset.owner = owner;
+        img.removeAttribute('src');
+      }
       if (img.getAttribute('src') === url) return;
       img.onload = () => img.classList.add('is-in');
       img.src = url;
     }
 
-    // Number count-up for stats
     function tween(el, to, fmt) {
       cancelAnimationFrame(el._raf);
       const from = Number(el.dataset.v || 0);
       el.dataset.v = to;
       if (from === to || prefersReducedMotion()) { el.textContent = fmt(to); return; }
-      const t0 = performance.now(), dur = 520;
+      const t0 = performance.now(), dur = 480;
       const step = (t) => {
         const p = Math.min(1, (t - t0) / dur);
         const e = 1 - Math.pow(1 - p, 3);
@@ -898,19 +1160,18 @@
       el._raf = requestAnimationFrame(step);
     }
 
-    // One-time sweep of the compare handle so people discover it is draggable
-    let hintScheduled = false, hinted = false, userTouchedCompare = false;
+    let hinted = false, userTouchedCompare = false;
     function hintSweep() {
       if (hinted || userTouchedCompare || prefersReducedMotion()) return;
       hinted = true;
-      const pts = [50, 76, 24, 50];
+      const pts = [50, 75, 25, 50];
       let seg = 0, t0 = null;
-      const dur = 520;
+      const dur = 500;
       const step = (t) => {
         if (userTouchedCompare) return;
         if (t0 === null) t0 = t;
         const p = Math.min(1, (t - t0) / dur);
-        const e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        const e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
         const v = pts[seg] + (pts[seg + 1] - pts[seg]) * e;
         els.compareRange.value = v;
         updateCompare(v);
@@ -921,7 +1182,7 @@
     }
 
     function addRipple(e) {
-      const t = e.target.closest('.btn, .chip, .text-btn, .icon-btn, .seg button, .file__main');
+      const t = e.target.closest('.btn, .chip, .text-btn, .icon-btn, .file__main');
       if (!t || t.disabled || prefersReducedMotion()) return;
       const r = t.getBoundingClientRect();
       const size = Math.max(r.width, r.height) * 2;
@@ -941,7 +1202,7 @@
 
     const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
     function outputName(originalName, mime) {
-      const base = originalName.replace(/\.[^/.]+$/, '') || 'image';
+      const base = originalName.replace(/\.[^/.]+$/, '') || 'photo';
       const ext = EXT[mime] || (originalName.split('.').pop() || 'jpg').toLowerCase();
       return `${base}_compressed.${ext}`;
     }
@@ -954,7 +1215,7 @@
     });
 
     /* ==================================================================
-       4. Native (Capacitor) helpers + saving
+       5. Native Capacitor / Mobile Integration
     ================================================================== */
     async function initNativeUI() {
       try {
@@ -962,9 +1223,9 @@
         if (!cap?.isNativePlatform?.()) return;
         const sb = cap.Plugins?.StatusBar;
         if (!sb) return;
-        const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        await sb.setBackgroundColor({ color: dark ? '#1A1816' : '#FFFFFF' });
-        await sb.setStyle({ style: dark ? 'DARK' : 'LIGHT' });
+        const isDark = state.theme === 'dark';
+        await sb.setBackgroundColor({ color: isDark ? '#0B0E14' : '#F8FAFC' });
+        await sb.setStyle({ style: isDark ? 'DARK' : 'LIGHT' });
       } catch (_) { /* plugin not installed */ }
     }
 
@@ -977,14 +1238,14 @@
           const data = await blobToBase64(blob);
           const path = `PhotoCompressor/${filename}`;
           const saved = await cap.Plugins.Filesystem.writeFile({ path, data, directory: 'DOCUMENTS', recursive: true });
-          showToast(`সেভ হয়েছে: Documents/${path}`);
+          showToast(`গ্যালারিতে সেভ হয়েছে: Documents/${path}`);
           if (cap.Plugins?.Share && saved?.uri) {
             try { await cap.Plugins.Share.share({ title: filename, url: saved.uri, dialogTitle: 'শেয়ার করুন' }); }
-            catch (_) { /* user closed share sheet */ }
+            catch (_) { /* user dismissed */ }
           }
           return;
         } catch (err) {
-          console.warn('Filesystem save failed, using web download:', err);
+          console.warn('Filesystem save error, falling back:', err);
         }
       }
 
@@ -997,7 +1258,7 @@
     }
 
     /* ==================================================================
-       5. Compression engine (canvas based, no third-party library)
+       6. Professional Compression Engine + Watermark
     ================================================================== */
     async function decodeImage(file) {
       try {
@@ -1021,14 +1282,56 @@
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
-      if (mime === 'image/jpeg') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); } // avoid black bg for transparent PNGs
+      if (mime === 'image/jpeg') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, w, h); }
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(decoded.source, 0, 0, w, h);
+
+      // Render Optional Watermark on Canvas
+      if (state.watermark.enabled && state.watermark.text.trim()) {
+        const text = state.watermark.text.trim();
+        const baseSize = Math.max(16, Math.round(Math.min(w, h) * 0.04));
+        ctx.font = `600 ${baseSize}px 'Hind Siliguri', sans-serif`;
+        const textMetrics = ctx.measureText(text);
+        const padding = baseSize * 0.6;
+        const boxW = textMetrics.width + padding * 2;
+        const boxH = baseSize * 1.6;
+
+        let posX = w - boxW - baseSize;
+        let posY = h - boxH - baseSize;
+
+        if (state.watermark.pos === 'bottom-left') {
+          posX = baseSize;
+          posY = h - boxH - baseSize;
+        } else if (state.watermark.pos === 'top-right') {
+          posX = w - boxW - baseSize;
+          posY = baseSize;
+        } else if (state.watermark.pos === 'center') {
+          posX = (w - boxW) / 2;
+          posY = (h - boxH) / 2;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = state.watermark.opacity;
+        // Pill background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+        ctx.beginPath();
+        const r = boxH / 3;
+        ctx.roundRect ? ctx.roundRect(posX, posY, boxW, boxH, r) : ctx.rect(posX, posY, boxW, boxH);
+        ctx.fill();
+
+        // White Text with shadow
+        ctx.fillStyle = '#FFFFFF';
+        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowBlur = 4;
+        ctx.fillText(text, posX + padding, posY + boxH - padding * 0.9);
+        ctx.restore();
+      }
+
       return canvas;
     }
 
     const canvasToBlob = (canvas, mime, quality) => new Promise((resolve, reject) => {
-      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('ছবি এনকোড করা যায়নি'))), mime, quality);
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('এনকোড ব্যর্থ হয়েছে'))), mime, quality);
     });
 
     async function encodeOnce(decoded, mime, quality) {
@@ -1053,9 +1356,9 @@
           if (lossy) {
             const hi = await canvasToBlob(canvas, mime, 0.92);
             if (hi.size <= targetBytes) return hi;
-            const lo = await canvasToBlob(canvas, mime, 0.4);
+            const lo = await canvasToBlob(canvas, mime, 0.38);
             if (lo.size <= targetBytes) {
-              let fit = lo, a = 0.4, b = 0.92;
+              let fit = lo, a = 0.38, b = 0.92;
               for (let i = 0; i < 6; i++) {
                 const mid = (a + b) / 2;
                 const blob = await canvasToBlob(canvas, mime, mid);
@@ -1073,7 +1376,7 @@
         } finally {
           canvas.width = canvas.height = 0;
         }
-        if (minSide * scale < 200) break;
+        if (minSide * scale < 180) break;
       }
       return best;
     }
@@ -1098,18 +1401,19 @@
         const mime = effectiveMime(item.file);
         let blob;
 
-        if (state.mode === 'target' && state.format === 'original' && item.file.size <= targetBytes()) {
+        if (!state.watermark.enabled && state.mode === 'target' && state.format === 'original' && item.file.size <= targetBytes()) {
           blob = item.file;
           item.note = 'kept-original';
         } else {
           decoded = await decodeImage(item.file);
-          if (state.mode === 'quality') {
-            blob = await encodeOnce(decoded, mime, state.quality / 100);
-          } else {
+          if (state.mode === 'target') {
             blob = await encodeToTarget(decoded, mime, targetBytes());
             if (blob.size > targetBytes()) item.note = 'above-target';
+          } else {
+            blob = await encodeOnce(decoded, mime, state.quality / 100);
           }
-          if (state.format === 'original' && blob.size >= item.file.size) {
+
+          if (!state.watermark.enabled && state.format === 'original' && blob.size >= item.file.size) {
             blob = item.file;
             item.note = 'kept-original';
           }
@@ -1124,7 +1428,7 @@
         if (job !== item.job) return;
         console.error('Compression error:', err);
         item.status = 'error';
-        item.error = err?.message || 'কম্প্রেস করতে সমস্যা হয়েছে';
+        item.error = err?.message || 'ছবি কম্প্রেস করা সম্ভব হয়নি';
       } finally {
         decoded?.close();
         if (job === item.job) render();
@@ -1145,10 +1449,10 @@
       state.items.forEach((i) => { i.status = 'pending'; });
       render();
       runQueue();
-    }, 300);
+    }, 280);
 
     /* ==================================================================
-       6. File handling
+       7. File Management
     ================================================================== */
     async function makeThumb(file) {
       try {
@@ -1157,7 +1461,7 @@
         c.width = bmp.width; c.height = bmp.height;
         c.getContext('2d').drawImage(bmp, 0, 0);
         bmp.close?.();
-        const blob = await canvasToBlob(c, 'image/jpeg', 0.7);
+        const blob = await canvasToBlob(c, 'image/jpeg', 0.75);
         c.width = c.height = 0;
         return URL.createObjectURL(blob);
       } catch (_) { return null; }
@@ -1166,7 +1470,7 @@
     function handleFiles(fileList) {
       const all = Array.from(fileList || []);
       const files = all.filter((f) => SUPPORTED_TYPES.includes(f.type));
-      if (!files.length) { showToast('শুধু JPG, PNG বা WebP ছবি সাপোর্ট করে'); return; }
+      if (!files.length) { showToast('শুধুমাত্র JPG, PNG বা WebP ছবি গ্রহণযোগ্য'); return; }
       if (files.length < all.length) showToast(`${all.length - files.length}টি অসমর্থিত ফাইল বাদ দেওয়া হয়েছে`);
 
       const added = files.map((file) => ({
@@ -1188,17 +1492,6 @@
     }
 
     function removeItem(id) {
-      const row = els.fileList.querySelector(`[data-id="${id}"]`);
-      if (row && !prefersReducedMotion()) {
-        if (row.classList.contains('is-leaving')) return;
-        row.classList.add('is-leaving');
-        setTimeout(() => removeItemNow(id), 200);
-      } else {
-        removeItemNow(id);
-      }
-    }
-
-    function removeItemNow(id) {
       const idx = state.items.findIndex((i) => i.id === id);
       if (idx === -1) return;
       const [item] = state.items.splice(idx, 1);
@@ -1209,7 +1502,7 @@
     }
 
     function clearAll() {
-      if (state.items.length > 1 && !window.confirm('সব ছবি তালিকা থেকে সরিয়ে ফেলবেন?')) return;
+      if (state.items.length > 1 && !window.confirm('সব ছবি তালিকা থেকে মুছে ফেলবেন?')) return;
       runToken++;
       state.items.forEach((i) => { i.job++; revokeUrls(i); });
       state.items = [];
@@ -1220,7 +1513,7 @@
     }
 
     /* ==================================================================
-       7. Rendering
+       8. UI Rendering
     ================================================================== */
     function updateCompare(pos) {
       const p = Math.min(100, Math.max(0, Number(pos)));
@@ -1228,22 +1521,14 @@
       els.compareDivider.style.left = `${p}%`;
     }
 
-    function syncSeg(seg) {
-      const btns = [...seg.querySelectorAll('button')];
-      seg.style.setProperty('--n', btns.length);
-      seg.style.setProperty('--i', Math.max(0, btns.findIndex((b) => b.getAttribute('aria-pressed') === 'true')));
-    }
-
-    function setSeg(container, attr, value) {
-      container.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset[attr] === value)));
-    }
-
     function syncControls() {
-      const isQ = state.mode === 'quality';
-      els.panelQuality.hidden = !isQ;
-      els.panelTarget.hidden = isQ;
-      els.tabQuality.setAttribute('aria-pressed', String(isQ));
-      els.tabTarget.setAttribute('aria-pressed', String(!isQ));
+      els.panelQuality.hidden = state.mode !== 'quality';
+      els.panelTarget.hidden = state.mode !== 'target';
+      els.panelWatermark.hidden = state.mode !== 'watermark';
+
+      els.tabQuality.setAttribute('aria-pressed', String(state.mode === 'quality'));
+      els.tabTarget.setAttribute('aria-pressed', String(state.mode === 'target'));
+      els.tabWatermark.setAttribute('aria-pressed', String(state.mode === 'watermark'));
 
       els.qualitySlider.value = state.quality;
       els.qualitySlider.style.setProperty('--fill', `${((state.quality - 5) / 95) * 100}%`);
@@ -1256,8 +1541,21 @@
       els.sizeChips.querySelectorAll('.chip').forEach((c) =>
         c.setAttribute('aria-pressed', String(c.dataset.unit === state.targetUnit && Number(c.dataset.size) === parseFloat(state.targetValue))));
 
-      setSeg(els.formatSeg, 'format', state.format);
-      [els.tabQuality.parentElement, els.unitKB.parentElement, els.formatSeg].forEach(syncSeg);
+      // Watermark Switch & Controls
+      els.switchWatermark.setAttribute('aria-checked', String(state.watermark.enabled));
+      els.watermarkControls.style.display = state.watermark.enabled ? 'flex' : 'none';
+      els.watermarkPreviewBadge.hidden = !state.watermark.enabled || !state.watermark.text.trim();
+      els.watermarkPreviewBadge.className = `compare__watermark-badge pos-${state.watermark.pos}`;
+      els.watermarkPreviewBadge.style.opacity = state.watermark.opacity;
+      els.watermarkPreviewText.textContent = state.watermark.text || '© Studio Pro';
+      els.watermarkOpacityLabel.textContent = `${Math.round(state.watermark.opacity * 100)}%`;
+      els.watermarkOpacitySlider.value = Math.round(state.watermark.opacity * 100);
+
+      els.watermarkPosChips.querySelectorAll('.chip').forEach((c) =>
+        c.setAttribute('aria-pressed', String(c.dataset.pos === state.watermark.pos)));
+
+      els.formatSeg.querySelectorAll('button').forEach((b) =>
+        b.setAttribute('aria-pressed', String(b.dataset.format === state.format)));
     }
 
     function createRow(item) {
@@ -1270,7 +1568,7 @@
           '<span class="file__meta"><span class="file__name"></span><span class="file__sub"></span></span>' +
           '<span class="file__status"></span>' +
         '</button>' +
-        '<button type="button" class="icon-btn file__remove" aria-label="ছবিটি সরান"><svg class="icon"><use href="#i-close"/></svg></button>';
+        '<button type="button" class="icon-btn file__remove" aria-label="ছবি মুছুন"><svg class="icon"><use href="#i-close"/></svg></button>';
       return li;
     }
 
@@ -1319,24 +1617,22 @@
 
       const loading = active.status === 'pending' || active.status === 'processing';
       els.previewLoader.classList.toggle('is-on', loading);
-      if (active.status === 'done' && !hintScheduled) { hintScheduled = true; setTimeout(hintSweep, 600); }
+      if (active.status === 'done' && !hinted) setTimeout(hintSweep, 500);
 
       els.statOrig.textContent = formatBytes(active.file.size);
-      els.statSaved.className = 'stat__value';
 
       if (active.status === 'done' && active.result) {
         const pct = savedPercent(active.file.size, active.result.size);
         tween(els.statNew, active.result.size, formatBytes);
         tween(els.statSaved, pct, (v) => { const r = Math.round(v); return r > 0 ? `−${r}%` : r < 0 ? `+${-r}%` : '0%'; });
-        els.statSaved.classList.add(pct >= 0 ? 'stat__value--ok' : 'stat__value--warn');
       } else {
         [els.statNew, els.statSaved].forEach((el) => { cancelAnimationFrame(el._raf); el.dataset.v = 0; el.textContent = '–'; });
       }
 
       let note = '', cls = 'notice';
       if (active.status === 'error') { note = active.error; cls = 'notice notice--err'; }
-      else if (active.note === 'kept-original') note = 'এই ছবি আগে থেকেই অপটিমাইজড, তাই আসল ফাইলটিই রাখা হয়েছে।';
-      else if (active.note === 'above-target') { note = 'টার্গেট সাইজে পৌঁছানো যায়নি; সম্ভাব্য সবচেয়ে ছোট সাইজ দেওয়া হয়েছে।'; cls = 'notice notice--warn'; }
+      else if (active.note === 'kept-original') note = 'এই ছবি আগে থেকেই অপটিমাইজড, তাই আসল ফাইলটিই অক্ষুণ্ণ রাখা হয়েছে।';
+      else if (active.note === 'above-target') { note = 'টার্গেট সাইজে পৌঁছানো যায়নি; সম্ভাব্য সর্বোচ্চ কম্প্রেশন সাইজ প্রদান করা হয়েছে।'; cls = 'notice notice--warn'; }
       els.previewNote.hidden = !note;
       els.previewNote.className = cls;
       els.previewNoteText.textContent = note;
@@ -1347,7 +1643,6 @@
     function render() {
       const has = state.items.length > 0;
       document.body.classList.toggle('has-items', has);
-      document.body.classList.toggle('is-busy', state.items.some((i) => i.status === 'pending' || i.status === 'processing'));
       els.emptyState.hidden = has;
       els.workspace.hidden = !has;
       els.actionBar.hidden = !has;
@@ -1370,21 +1665,21 @@
         const done = state.items.filter((i) => i.status === 'done' && i.result);
         const comp = state.items.reduce((s, i) => s + (i.result?.size || i.file.size), 0);
         const pct = savedPercent(orig, comp);
-        els.filesSummary.textContent = `মোট ${formatBytes(orig)} → ${formatBytes(comp)}` + (done.length === n ? ` · ${pct >= 0 ? `${pct}% সেভ` : `${-pct}% বেশি`}` : ' · প্রসেসিং চলছে…');
+        els.filesSummary.textContent = `মোট ${formatBytes(orig)} → ${formatBytes(comp)}` + (done.length === n ? ` · (${pct >= 0 ? `${pct}% সেভ` : `${-pct}% বেশি`})` : ' · কম্প্রেশন চলছে…');
       }
 
       const ready = state.items.filter((i) => i.status === 'done' && i.result).length;
       els.btnSaveOne.disabled = !(active.status === 'done' && active.result);
       els.btnSaveOne.classList.toggle('btn--outline', bulk);
       els.btnSaveOne.classList.toggle('btn--primary', !bulk);
-      els.btnSaveOneText.textContent = bulk ? 'এই ছবি' : 'ছবি সেভ করুন';
+      els.btnSaveOneText.textContent = bulk ? 'এই ছবি সেভ' : 'ছবি সেভ করুন';
       els.btnSaveZip.hidden = !bulk;
       els.btnSaveZip.disabled = ready === 0;
       els.btnSaveZipText.textContent = `সব সেভ (${ready})`;
     }
 
     /* ==================================================================
-       8. Saving: single file and ZIP (store-only writer, no dependency)
+       9. ZIP Generation (Offline CRC32 Writer)
     ================================================================== */
     const CRC_TABLE = (() => {
       const t = new Uint32Array(256);
@@ -1401,7 +1696,6 @@
       return (c ^ 0xFFFFFFFF) >>> 0;
     }
 
-    // Photos are already compressed, so storing (no deflate) is the right choice.
     async function buildZip(entries) {
       const enc = new TextEncoder();
       const parts = [], central = [];
@@ -1470,7 +1764,7 @@
     }
 
     /* ==================================================================
-       9. In-app update check
+       10. In-App Update Engine
     ================================================================== */
     async function checkForUpdate(manual = false) {
       if (!navigator.onLine) { if (manual) showToast('ইন্টারনেট সংযোগ নেই'); return; }
@@ -1492,8 +1786,7 @@
           showToast('আপনি সর্বশেষ ভার্সন ব্যবহার করছেন');
         }
       } catch (err) {
-        if (manual) showToast('আপডেট চেক করা যায়নি, পরে চেষ্টা করুন');
-        console.debug('Update check skipped:', err?.message);
+        if (manual) showToast('আপডেট চেক করা যায়নি');
       } finally {
         clearTimeout(timer);
       }
@@ -1519,22 +1812,6 @@
       els.updateModal.hidden = true;
     }
 
-    function openAbout() {
-      els.aboutVer.textContent = `v${APP_CONFIG.CURRENT_VERSION_NAME}`;
-      els.aboutLegal.textContent = `© ${new Date().getFullYear()} ${APP_CONFIG.DEVELOPER_NAME}. সর্বস্বত্ব সংরক্ষিত।`;
-      els.btnFacebook.hidden = !/^https:\/\//i.test(APP_CONFIG.FACEBOOK_URL);
-      els.aboutModal.hidden = false;
-    }
-    const closeAbout = () => { els.aboutModal.hidden = true; };
-
-    async function openExternal(url) {
-      try {
-        const browser = window.Capacitor?.Plugins?.Browser;
-        if (browser) { await browser.open({ url }); return; }
-      } catch (_) { /* fall through */ }
-      window.open(url, '_blank', 'noopener,noreferrer');
-    }
-
     async function openApkUrl() {
       const url = state.remoteUpdate?.apk_url;
       if (!url) return;
@@ -1546,20 +1823,38 @@
     }
 
     /* ==================================================================
-       10. Events
+       11. Event Bindings
     ================================================================== */
     function bindEvents() {
+      // Splash Dismiss
+      const hideSplash = () => els.splashScreen.classList.add('is-hidden');
+      els.splashScreen.addEventListener('click', hideSplash);
+      setTimeout(hideSplash, 1800);
+
+      // Replay Splash
+      els.btnReplaySplash.addEventListener('click', () => {
+        els.splashScreen.classList.remove('is-hidden');
+      });
+
+      // Theme toggle
+      els.btnToggleTheme.addEventListener('click', toggleTheme);
+
+      // File Pickers
       const pick = () => els.fileInput.click();
       els.btnSelectFiles.addEventListener('click', pick);
       els.btnAddMore.addEventListener('click', pick);
       els.fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); e.target.value = ''; });
 
-      // Drag and drop anywhere (desktop / web use)
+      // Drag and drop
       document.addEventListener('dragover', (e) => e.preventDefault());
-      document.addEventListener('drop', (e) => { e.preventDefault(); if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files); });
+      document.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files);
+      });
 
       els.btnClearAll.addEventListener('click', clearAll);
 
+      // File List Interaction
       els.fileList.addEventListener('click', (e) => {
         const li = e.target.closest('.file');
         if (!li) return;
@@ -1567,25 +1862,43 @@
         if (state.activeId !== li.dataset.id) { state.activeId = li.dataset.id; render(); }
       });
 
+      // Compare Slider
       els.compareRange.addEventListener('input', (e) => updateCompare(e.target.value));
       els.compareRange.addEventListener('pointerdown', () => { userTouchedCompare = true; });
       document.addEventListener('pointerdown', addRipple);
 
-      // Mode
-      const setMode = (m) => { if (state.mode === m) return; state.mode = m; render(); scheduleRecompress(); };
+      // Mode Tabs
+      const setMode = (m) => {
+        if (state.mode === m) return;
+        state.mode = m;
+        syncControls();
+        scheduleRecompress();
+      };
       els.tabQuality.addEventListener('click', () => setMode('quality'));
       els.tabTarget.addEventListener('click', () => setMode('target'));
+      els.tabWatermark.addEventListener('click', () => setMode('watermark'));
 
-      // Quality
-      const setQuality = (v) => { state.quality = Math.min(100, Math.max(5, Number(v))); syncControls(); scheduleRecompress(); };
+      // Quality Controls
+      const setQuality = (v) => {
+        state.quality = Math.min(100, Math.max(5, Number(v)));
+        syncControls();
+        scheduleRecompress();
+      };
       els.qualitySlider.addEventListener('input', (e) => setQuality(e.target.value));
-      els.qualityChips.addEventListener('click', (e) => { const c = e.target.closest('.chip'); if (c) setQuality(c.dataset.q); });
+      els.qualityChips.addEventListener('click', (e) => {
+        const c = e.target.closest('.chip');
+        if (c) setQuality(c.dataset.q);
+      });
 
-      // Target size
+      // Target Size Controls
       const setUnit = (u) => { state.targetUnit = u; syncControls(); scheduleRecompress(); };
       els.unitKB.addEventListener('click', () => setUnit('KB'));
       els.unitMB.addEventListener('click', () => setUnit('MB'));
-      els.targetInput.addEventListener('input', (e) => { state.targetValue = e.target.value; syncControls(); scheduleRecompress(); });
+      els.targetInput.addEventListener('input', (e) => {
+        state.targetValue = e.target.value;
+        syncControls();
+        scheduleRecompress();
+      });
       els.sizeChips.addEventListener('click', (e) => {
         const c = e.target.closest('.chip');
         if (!c) return;
@@ -1594,7 +1907,31 @@
         setUnit(c.dataset.unit);
       });
 
-      // Format
+      // Watermark Switch & Controls
+      els.switchWatermark.addEventListener('click', () => {
+        state.watermark.enabled = !state.watermark.enabled;
+        syncControls();
+        scheduleRecompress();
+      });
+      els.inputWatermarkText.addEventListener('input', (e) => {
+        state.watermark.text = e.target.value;
+        syncControls();
+        scheduleRecompress();
+      });
+      els.watermarkPosChips.addEventListener('click', (e) => {
+        const c = e.target.closest('.chip');
+        if (!c) return;
+        state.watermark.pos = c.dataset.pos;
+        syncControls();
+        scheduleRecompress();
+      });
+      els.watermarkOpacitySlider.addEventListener('input', (e) => {
+        state.watermark.opacity = Number(e.target.value) / 100;
+        syncControls();
+        scheduleRecompress();
+      });
+
+      // Format Selector
       els.formatSeg.addEventListener('click', (e) => {
         const b = e.target.closest('button');
         if (!b || state.format === b.dataset.format) return;
@@ -1603,36 +1940,27 @@
         scheduleRecompress();
       });
 
+      // Actions
       els.btnSaveOne.addEventListener('click', saveActive);
       els.btnSaveZip.addEventListener('click', saveAllZip);
 
-      // Updates
+      // In-App Updates
       els.btnCheckUpdate.addEventListener('click', () => (state.remoteUpdate ? showUpdateModal(state.remoteUpdate) : checkForUpdate(true)));
       els.btnUpdateNow.addEventListener('click', openApkUrl);
       els.btnUpdateLater.addEventListener('click', closeUpdateModal);
-      els.btnBrand.addEventListener('click', openAbout);
-      els.btnCredit.addEventListener('click', openAbout);
-      els.btnAboutClose.addEventListener('click', closeAbout);
-      els.aboutModal.addEventListener('click', (e) => { if (e.target === els.aboutModal) closeAbout(); });
-      els.btnFacebook.addEventListener('click', () => openExternal(APP_CONFIG.FACEBOOK_URL));
-      els.btnAboutUpdate.addEventListener('click', () => { closeAbout(); checkForUpdate(true); });
       els.updateModal.addEventListener('click', (e) => { if (e.target === els.updateModal) closeUpdateModal(); });
-      document.addEventListener('keydown', (e) => { if (e.key !== 'Escape') return; if (!els.aboutModal.hidden) closeAbout(); else if (!els.updateModal.hidden) closeUpdateModal(); });
 
       window.addEventListener('beforeunload', () => state.items.forEach(revokeUrls));
     }
 
     /* ==================================================================
-       11. Boot
+       12. Boot
     ================================================================== */
     document.addEventListener('DOMContentLoaded', () => {
+      applyTheme(state.theme);
       bindEvents();
       render();
-      initNativeUI();
-      const splash = document.getElementById('splash');
-      splash?.addEventListener('click', () => splash.remove());
-      setTimeout(() => splash?.remove(), 2600);
-      setTimeout(() => checkForUpdate(false), 3000);
+      setTimeout(() => checkForUpdate(false), 2000);
     });
   })();
   </script>
